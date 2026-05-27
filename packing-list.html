@@ -1,0 +1,2626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#2a2620">
+<title>The Move — 3 Day Sprint</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+<!-- Firebase (compat = works in plain <script> tags) -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+<style>
+  :root {
+    --bg: #f6f1e8;
+    --bg-card: #fbf8f1;
+    --bg-elev: #ffffff;
+    --ink: #2a2620;
+    --ink-soft: #5c554a;
+    --ink-faint: #978c7a;
+    --line: #e4dccb;
+    --line-soft: #ede5d3;
+    --ember: #a04a2a;
+    --ember-deep: #7a3618;
+    --ember-soft: #f0d9c8;
+    --honey: #c8881e;
+    --honey-deep: #9a6712;
+    --honey-soft: #f4e3c0;
+    --slate: #8a847a;
+    --slate-deep: #5c554a;
+    --slate-soft: #dad5cc;
+    --moss: #5a6b3a;
+    --moss-soft: #dde3c8;
+    --sky: #3e6680;
+    --sky-soft: #d6e1ea;
+    --plum: #6b4a6b;
+    --plum-soft: #e4d8e4;
+    --wine: #7d3a4e;
+    --wine-soft: #ead4dc;
+    --shadow: 0 1px 2px rgba(42, 38, 32, 0.04), 0 4px 16px rgba(42, 38, 32, 0.06);
+    --shadow-lg: 0 8px 32px rgba(42, 38, 32, 0.14);
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg); color: var(--ink);
+    font-size: 16px; line-height: 1.5;
+    min-height: 100vh; padding-bottom: 110px;
+    -webkit-font-smoothing: antialiased;
+    background-image:
+      radial-gradient(circle at 12% 8%, rgba(160, 74, 42, 0.04) 0%, transparent 50%),
+      radial-gradient(circle at 88% 92%, rgba(90, 107, 58, 0.04) 0%, transparent 50%);
+  }
+  code, .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* ===== SETUP WIZARD ===== */
+  .setup {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  .setup-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 30px 24px;
+    max-width: 520px; width: 100%;
+    box-shadow: var(--shadow-lg);
+  }
+  .setup-eyebrow {
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ember); margin-bottom: 8px;
+  }
+  .setup-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 600; font-size: 28px;
+    letter-spacing: -0.02em; line-height: 1.1;
+    margin-bottom: 8px;
+  }
+  .setup-title em { font-style: italic; color: var(--ember); font-weight: 500; }
+  .setup-sub { font-size: 14px; color: var(--ink-soft); margin-bottom: 22px; line-height: 1.55; }
+  .setup-step { display: none; }
+  .setup-step.active { display: block; }
+  .setup-label {
+    display: block;
+    font-size: 12px; font-weight: 700;
+    letter-spacing: 0.04em; text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+  }
+  .setup-input {
+    width: 100%; padding: 11px 14px;
+    border: 1px solid var(--line);
+    background: var(--bg-elev);
+    border-radius: var(--radius-sm);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--ink); outline: none;
+    transition: border-color 150ms ease;
+    margin-bottom: 16px;
+    resize: vertical;
+  }
+  .setup-input:focus { border-color: var(--ember); }
+  .setup-input.large { font-family: inherit; font-size: 14px; font-weight: 600; letter-spacing: 0.06em; }
+  .setup-input textarea { min-height: 140px; }
+  .setup-textarea {
+    width: 100%; padding: 11px 14px;
+    border: 1px solid var(--line);
+    background: var(--bg-elev);
+    border-radius: var(--radius-sm);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; line-height: 1.45;
+    color: var(--ink); outline: none;
+    min-height: 180px;
+    margin-bottom: 16px;
+    resize: vertical;
+  }
+  .setup-textarea:focus { border-color: var(--ember); }
+  .setup-actions {
+    display: flex; gap: 8px; justify-content: space-between;
+    align-items: center;
+    margin-top: 4px;
+  }
+  .setup-btn {
+    padding: 10px 18px;
+    background: var(--ember); color: white;
+    border: none; border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 13px; font-weight: 700;
+    cursor: pointer;
+    transition: all 150ms ease;
+    letter-spacing: 0.02em;
+  }
+  .setup-btn:hover { background: var(--ember-deep); }
+  .setup-btn:disabled { background: var(--ink-faint); cursor: not-allowed; }
+  .setup-btn.ghost { background: transparent; color: var(--ink-soft); border: 1px solid var(--line); }
+  .setup-btn.ghost:hover { border-color: var(--ember); color: var(--ember); }
+  .setup-help {
+    font-size: 12px; color: var(--ink-soft);
+    line-height: 1.55;
+    margin-bottom: 18px;
+    padding: 11px 13px;
+    background: var(--ember-soft);
+    border-left: 3px solid var(--ember);
+    border-radius: var(--radius-sm);
+  }
+  .setup-help strong { color: var(--ember-deep); }
+  .setup-help a { color: var(--ember-deep); }
+  .setup-help code { background: rgba(122, 54, 24, 0.1); padding: 1px 5px; border-radius: 3px; font-size: 11.5px; }
+  .setup-error {
+    font-size: 12.5px; color: #8a2020;
+    background: #f8e4e4; border-left: 3px solid #b3331c;
+    padding: 9px 12px; border-radius: var(--radius-sm);
+    margin-bottom: 14px; display: none;
+  }
+  .setup-error.show { display: block; }
+  .person-pick {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .person-pick button {
+    padding: 18px 12px;
+    border: 2px solid var(--line);
+    background: var(--bg-elev);
+    border-radius: var(--radius);
+    font-family: inherit;
+    font-size: 16px; font-weight: 700;
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 150ms ease;
+  }
+  .person-pick button:hover { border-color: var(--ink-faint); transform: translateY(-1px); }
+  .person-pick button.cj { border-color: var(--sky); color: var(--sky); }
+  .person-pick button.cj:hover { background: var(--sky-soft); }
+  .person-pick button.chelsea { border-color: var(--plum); color: var(--plum); }
+  .person-pick button.chelsea:hover { background: var(--plum-soft); }
+  .room-code-display {
+    text-align: center;
+    padding: 22px 12px;
+    background: linear-gradient(135deg, var(--ember-soft) 0%, #f9e4d4 100%);
+    border-radius: var(--radius);
+    margin-bottom: 14px;
+  }
+  .room-code-eyebrow {
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ember-deep); margin-bottom: 8px;
+  }
+  .room-code-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 32px; font-weight: 700;
+    letter-spacing: 0.15em;
+    color: var(--ember-deep);
+    margin-bottom: 12px;
+  }
+  .room-code-share {
+    font-size: 12px; color: var(--ember-deep);
+    line-height: 1.5;
+  }
+
+  /* ===== APP HEADER ===== */
+  .app { display: none; }
+  .app.show { display: block; }
+
+  .header {
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--line);
+    padding: 12px 18px 10px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: saturate(180%) blur(8px);
+    -webkit-backdrop-filter: saturate(180%) blur(8px);
+  }
+  .header-inner { max-width: 900px; margin: 0 auto; }
+  .title-row {
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 10px; margin-bottom: 8px;
+  }
+  .title {
+    font-family: 'Fraunces', serif;
+    font-weight: 600; font-size: 17px;
+    letter-spacing: -0.01em;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .title em { font-style: italic; color: var(--ember); font-weight: 500; }
+
+  .users-strip {
+    display: flex; gap: 6px;
+  }
+  .user-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 9px;
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: 100px;
+    font-size: 11.5px; font-weight: 700;
+  }
+  .user-chip.cj { color: var(--sky); border-color: var(--sky-soft); }
+  .user-chip.chelsea { color: var(--plum); border-color: var(--plum-soft); }
+  .user-chip.me { box-shadow: 0 0 0 2px rgba(160, 74, 42, 0.18); }
+  .user-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--ink-faint);
+  }
+  .user-chip.online .user-dot {
+    background: #4caf50;
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.25);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+  }
+
+  .progress-stats {
+    font-size: 11.5px; color: var(--ink-soft);
+    font-variant-numeric: tabular-nums; font-weight: 600;
+    white-space: nowrap;
+  }
+  .progress-stats strong { color: var(--ember); font-weight: 800; font-size: 13.5px; }
+
+  .progress-bar {
+    height: 5px; background: var(--line-soft);
+    border-radius: 100px; overflow: hidden; position: relative;
+    display: flex;
+  }
+  .progress-keep { background: var(--ember); height: 100%; transition: width 400ms ease; }
+  .progress-sell { background: var(--honey); height: 100%; transition: width 400ms ease; }
+  .progress-toss { background: var(--slate); height: 100%; transition: width 400ms ease; }
+
+  .tallies {
+    display: flex; gap: 6px; margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .tally {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 9px;
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: 100px;
+    font-size: 11.5px; font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    transition: all 130ms ease;
+  }
+  .tally:hover { transform: translateY(-1px); }
+  .tally-dot { width: 7px; height: 7px; border-radius: 50%; }
+  .tally.keep { color: var(--ember-deep); border-color: var(--ember-soft); }
+  .tally.keep .tally-dot { background: var(--ember); }
+  .tally.sell { color: var(--honey-deep); border-color: var(--honey-soft); }
+  .tally.sell .tally-dot { background: var(--honey); }
+  .tally.toss { color: var(--slate-deep); border-color: var(--slate-soft); }
+  .tally.toss .tally-dot { background: var(--slate); }
+  .tally.pending { color: var(--ink-faint); }
+  .tally.pending .tally-dot { background: var(--ink-faint); }
+  .tally.boxes { color: var(--moss); border-color: var(--moss-soft); }
+  .tally.boxes .tally-dot { background: var(--moss); }
+
+  .sprint-bar { display: flex; gap: 5px; margin-top: 8px; }
+  .sprint-day {
+    flex: 1;
+    padding: 5px 6px;
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all 150ms ease;
+  }
+  .sprint-day:hover { border-color: var(--ink-faint); }
+  .sprint-day.active { background: var(--ink); color: var(--bg-card); border-color: var(--ink); }
+  .sprint-day .day-stat {
+    display: block; font-size: 9.5px; font-weight: 600;
+    opacity: 0.7; letter-spacing: 0; text-transform: none;
+    margin-top: 1px;
+  }
+
+  /* ===== FOCUS BAR ===== */
+  .focus-bar {
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--line);
+    padding: 8px 18px;
+    position: sticky;
+    top: 0;
+    z-index: 49;
+  }
+  .focus-inner {
+    max-width: 900px; margin: 0 auto;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .timer-wrap {
+    display: flex; align-items: center; gap: 6px;
+    padding: 5px 10px;
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: 100px;
+    font-variant-numeric: tabular-nums;
+  }
+  .timer-wrap.running { border-color: var(--ember); background: var(--ember-soft); }
+  .timer-wrap.break { border-color: var(--moss); background: var(--moss-soft); }
+  .timer-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ink-faint); flex-shrink: 0; }
+  .timer-wrap.running .timer-dot { background: var(--ember); animation: pulse 1.4s ease-in-out infinite; }
+  .timer-wrap.break .timer-dot { background: var(--moss); animation: pulse 1.4s ease-in-out infinite; }
+  .timer-display {
+    font-family: 'Fraunces', serif;
+    font-weight: 600; font-size: 14px; letter-spacing: -0.01em;
+    min-width: 44px; text-align: center;
+  }
+  .timer-mode {
+    font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--ink-soft);
+  }
+  .timer-wrap.running .timer-mode { color: var(--ember-deep); }
+  .timer-wrap.break .timer-mode { color: #3c4825; }
+  .icon-btn {
+    width: 26px; height: 26px;
+    border: none; background: transparent;
+    color: var(--ink-soft);
+    border-radius: 100px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 130ms ease;
+  }
+  .icon-btn:hover { background: var(--line-soft); color: var(--ink); }
+  .icon-btn svg { width: 13px; height: 13px; }
+
+  .pick-btn {
+    padding: 6px 12px;
+    background: var(--ember); color: white;
+    border: none; border-radius: 100px;
+    font-family: inherit;
+    font-size: 12px; font-weight: 700;
+    cursor: pointer;
+    transition: all 150ms ease;
+    display: inline-flex; align-items: center; gap: 5px;
+    box-shadow: 0 2px 8px rgba(160, 74, 42, 0.25);
+  }
+  .pick-btn:hover { background: var(--ember-deep); transform: translateY(-1px); }
+  .pick-btn:active { transform: translateY(0) scale(0.97); }
+
+  .streak-pill {
+    margin-left: auto;
+    padding: 3px 9px;
+    background: linear-gradient(135deg, #f4c542 0%, #d4951c 100%);
+    color: #4a2e00;
+    border-radius: 100px;
+    font-size: 10.5px; font-weight: 800;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    display: none;
+    box-shadow: 0 2px 6px rgba(212, 149, 28, 0.3);
+  }
+  .streak-pill.show { display: inline-block; animation: pop 250ms ease-out; }
+  @keyframes pop {
+    0% { transform: scale(0.6); opacity: 0; }
+    60% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* ===== ACTIVITY TICKER ===== */
+  .activity-ticker {
+    background: var(--ink);
+    color: var(--bg-card);
+    padding: 7px 18px;
+    font-size: 12px;
+    text-align: center;
+    transition: max-height 300ms ease, opacity 300ms ease;
+    max-height: 40px;
+    overflow: hidden;
+  }
+  .activity-ticker.empty { max-height: 0; padding: 0; opacity: 0; }
+  .activity-ticker .who { font-weight: 700; }
+  .activity-ticker .who.cj { color: #9db5cf; }
+  .activity-ticker .who.chelsea { color: #c9aac9; }
+  .activity-ticker .box-tag {
+    display: inline-block;
+    padding: 1px 6px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 700;
+    margin-left: 4px;
+  }
+
+  /* ===== TABS ===== */
+  .tabs-wrap {
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--line);
+    position: sticky;
+    z-index: 48;
+  }
+  .tabs {
+    max-width: 900px; margin: 0 auto;
+    padding: 7px 18px;
+    display: flex; gap: 5px;
+    overflow-x: auto; overflow-y: hidden;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex-shrink: 0; padding: 6px 12px;
+    border: 1px solid var(--line);
+    background: var(--bg-elev);
+    color: var(--ink-soft);
+    border-radius: 100px;
+    font-family: inherit;
+    font-size: 12px; font-weight: 600;
+    cursor: pointer;
+    transition: all 180ms ease;
+    display: inline-flex; align-items: center; gap: 6px;
+    white-space: nowrap;
+  }
+  .tab:hover { border-color: var(--ink-faint); color: var(--ink); }
+  .tab.active { background: var(--ink); color: var(--bg-card); border-color: var(--ink); }
+  .tab-count {
+    font-size: 10.5px; font-variant-numeric: tabular-nums;
+    opacity: 0.7; font-weight: 500;
+  }
+  .tab.complete .tab-count::before {
+    content: '✓ '; color: var(--moss); opacity: 1; font-weight: 700;
+  }
+  .tab.active.complete .tab-count::before { color: var(--moss-soft); }
+  .tab.cleaning { border-style: dashed; }
+  .tab.cleaning.active { border-style: solid; }
+  .tab.special {
+    background: linear-gradient(135deg, var(--moss-soft) 0%, #c9d4ac 100%);
+    color: #3c4825;
+    border-color: #b3c197;
+  }
+  .tab.special.active { background: var(--moss); color: white; border-color: var(--moss); }
+
+  /* ===== MAIN ===== */
+  main { max-width: 900px; margin: 0 auto; padding: 20px 18px 40px; }
+
+  .room-header { margin-bottom: 16px; }
+  .room-eyebrow {
+    font-size: 10.5px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ember); margin-bottom: 5px;
+  }
+  .room-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 600; font-size: 28px;
+    letter-spacing: -0.02em; line-height: 1.1;
+  }
+  .room-note {
+    margin-top: 9px;
+    font-size: 13.5px; color: var(--ink-soft);
+    font-style: italic; line-height: 1.5;
+    max-width: 580px;
+  }
+  .room-day-tag {
+    display: inline-block;
+    margin-top: 7px;
+    padding: 2px 9px;
+    background: var(--ember-soft); color: var(--ember-deep);
+    border-radius: 100px;
+    font-size: 10.5px; font-weight: 700;
+    letter-spacing: 0.04em; text-transform: uppercase;
+  }
+
+  /* ===== VALUABLES (pinned) ===== */
+  .valuables {
+    background: linear-gradient(180deg, #fbf6f1 0%, #f8f0ed 100%);
+    border: 1px solid var(--wine-soft);
+    border-left: 4px solid var(--wine);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .valuables-header { padding: 14px 16px 10px; border-bottom: 1px solid var(--wine-soft); }
+  .valuables-eyebrow {
+    font-size: 10.5px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--wine); margin-bottom: 4px;
+  }
+  .valuables-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 600; font-size: 18px;
+    letter-spacing: -0.01em;
+  }
+  .ashes-banner {
+    margin: 11px 16px 0;
+    padding: 12px 14px;
+    background: var(--wine-soft);
+    border-left: 3px solid var(--wine);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    color: var(--wine);
+    line-height: 1.5;
+  }
+  .ashes-banner strong {
+    font-family: 'Fraunces', serif;
+    font-weight: 600; font-style: italic;
+    color: var(--wine);
+    display: block;
+    margin-bottom: 3px;
+    font-size: 14px;
+  }
+  .valuable-item { padding: 13px 16px; border-top: 1px solid var(--wine-soft); }
+  .valuable-item.critical { background: rgba(125, 58, 78, 0.04); }
+  .valuable-name {
+    font-family: 'Fraunces', serif;
+    font-weight: 600; font-size: 15.5px;
+    letter-spacing: -0.01em;
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+  }
+  .critical-badge {
+    font-family: 'Manrope', sans-serif;
+    font-size: 9px; font-weight: 800;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    background: var(--wine); color: white;
+    padding: 2px 7px; border-radius: 100px;
+  }
+  .valuable-progress {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; font-weight: 700;
+    color: var(--ink-faint);
+  }
+  .valuable-note {
+    font-size: 12px;
+    color: var(--ink-soft);
+    font-style: italic;
+    margin-bottom: 8px;
+    line-height: 1.45;
+  }
+  .valuable-tasks { display: flex; flex-direction: column; gap: 2px; }
+  .valuable-task {
+    display: flex; align-items: center; gap: 9px;
+    padding: 6px 0;
+    cursor: pointer;
+    font-size: 13.5px;
+    color: var(--ink);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .vt-check {
+    width: 17px; height: 17px;
+    border: 1.5px solid var(--wine);
+    border-radius: 4px;
+    flex-shrink: 0; position: relative;
+    background: var(--bg-elev);
+    transition: all 180ms ease;
+  }
+  .vt-check::after {
+    content: ''; position: absolute; left: 5px; top: 1px;
+    width: 5px; height: 9px;
+    border-right: 2px solid white; border-bottom: 2px solid white;
+    transform: rotate(45deg) scale(0);
+    transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .valuable-task.done .vt-check { background: var(--wine); }
+  .valuable-task.done .vt-check::after { transform: rotate(45deg) scale(1); }
+  .valuable-task.done .vt-label {
+    color: var(--ink-faint);
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+  }
+
+  /* ===== SECTIONS ===== */
+  .section {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    margin-bottom: 11px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .section-header {
+    padding: 11px 14px;
+    background: var(--bg-elev);
+    border-bottom: 1px solid var(--line-soft);
+    cursor: pointer; user-select: none;
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 10px;
+    transition: background 120ms ease;
+  }
+  .section-header:hover { background: #fefdf9; }
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 600; font-size: 15.5px;
+    letter-spacing: -0.01em;
+  }
+  .section-meta {
+    display: flex; align-items: center; gap: 9px;
+    font-size: 11.5px; color: var(--ink-faint);
+    font-variant-numeric: tabular-nums; font-weight: 700;
+  }
+  .section-meta.complete { color: var(--moss); }
+  .chevron {
+    width: 13px; height: 13px;
+    transition: transform 200ms ease;
+    color: var(--ink-faint); flex-shrink: 0;
+  }
+  .section.collapsed .chevron { transform: rotate(-90deg); }
+
+  /* Active box pill in section */
+  .active-box-row {
+    padding: 7px 14px 8px;
+    background: linear-gradient(180deg, #f6efe1 0%, #f1e8d4 100%);
+    border-bottom: 1px solid var(--line-soft);
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .active-box-label {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .active-box-pill {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px; font-weight: 700;
+    padding: 3px 8px;
+    background: var(--moss);
+    color: white;
+    border-radius: 4px;
+    letter-spacing: 0.02em;
+  }
+  .active-box-count {
+    font-size: 11px; color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+  }
+  .close-box-btn {
+    margin-left: auto;
+    padding: 4px 9px;
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 11px; font-weight: 600;
+    cursor: pointer;
+    transition: all 130ms ease;
+  }
+  .close-box-btn:hover { border-color: var(--moss); color: var(--moss); }
+
+  .section-body {
+    padding: 3px 0 6px;
+    max-height: 6000px; overflow: hidden;
+    transition: max-height 300ms ease, padding 300ms ease;
+  }
+  .section.collapsed .section-body { max-height: 0; padding: 0; }
+
+  /* ===== ITEMS ===== */
+  .item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 7px 12px 7px 14px;
+    border-bottom: 1px solid var(--line-soft);
+    transition: background 120ms ease;
+    min-height: 44px;
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .item:last-of-type { border-bottom: none; }
+  .item:hover { background: #fefdf9; }
+  .item.flash { animation: flash 800ms ease; }
+  @keyframes flash {
+    0%, 100% { background: var(--bg-card); }
+    30% { background: var(--ember-soft); }
+  }
+
+  .status-dot {
+    width: 19px; height: 19px;
+    border: 1.5px solid var(--ink-faint);
+    border-radius: 5px;
+    flex-shrink: 0; position: relative;
+    background: var(--bg-elev);
+    transition: all 180ms cubic-bezier(0.22, 1, 0.36, 1);
+    cursor: pointer;
+  }
+  .status-dot::after {
+    content: ''; position: absolute; left: 5px; top: 1px;
+    width: 6px; height: 10px;
+    border-right: 2px solid white; border-bottom: 2px solid white;
+    transform: rotate(45deg) scale(0);
+    transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .item.keep .status-dot { background: var(--ember); border-color: var(--ember); }
+  .item.keep .status-dot::after { transform: rotate(45deg) scale(1); }
+  .item.sell .status-dot { background: var(--honey); border-color: var(--honey); }
+  .item.sell .status-dot::after {
+    content: '$'; border: none;
+    transform: scale(1);
+    left: 0; top: 0; width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11.5px; font-weight: 800; color: white;
+  }
+  .item.toss .status-dot { background: var(--slate); border-color: var(--slate); }
+  .item.toss .status-dot::after {
+    content: '×'; border: none;
+    transform: scale(1);
+    left: 0; top: 0; width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 800; color: white; padding-bottom: 1px;
+  }
+  .item.keep-cj .status-dot { background: var(--sky); border-color: var(--sky); }
+  .item.keep-chelsea .status-dot { background: var(--plum); border-color: var(--plum); }
+
+  .item-main { flex: 1; min-width: 0; }
+  .item-label {
+    font-size: 14px; font-weight: 500;
+    color: var(--ink);
+    transition: all 200ms ease;
+    line-height: 1.35;
+  }
+  .item.keep .item-label,
+  .item.sell .item-label {
+    color: var(--ink-faint);
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+  }
+  .item.toss .item-label {
+    color: var(--ink-faint);
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+    font-style: italic;
+  }
+  .box-tag {
+    display: inline-block;
+    margin-top: 2px;
+    padding: 1.5px 6px;
+    background: var(--moss);
+    color: white;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1.3;
+  }
+  .item.custom .item-label::before { content: '+ '; color: var(--ember); font-weight: 700; }
+
+  .action-btns { display: flex; gap: 2px; flex-shrink: 0; }
+  .action-btn {
+    width: 26px; height: 26px;
+    border: 1px solid transparent;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12.5px; font-weight: 800;
+    color: var(--ink-faint);
+    transition: all 130ms ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .action-btn:hover { background: var(--line-soft); color: var(--ink); }
+  .action-btn.keep.active { background: var(--ember); color: white; border-color: var(--ember); }
+  .action-btn.sell.active { background: var(--honey); color: white; border-color: var(--honey); }
+  .action-btn.toss.active { background: var(--slate); color: white; border-color: var(--slate); }
+
+  .add-row {
+    display: flex; align-items: center; gap: 7px;
+    padding: 7px 12px 9px;
+  }
+  .add-input {
+    flex: 1; padding: 7px 11px;
+    border: 1px dashed var(--line);
+    background: transparent;
+    border-radius: var(--radius-sm);
+    font-family: inherit; font-size: 13.5px;
+    color: var(--ink); outline: none;
+    transition: all 150ms ease;
+  }
+  .add-input::placeholder { color: var(--ink-faint); }
+  .add-input:focus { border-style: solid; border-color: var(--ember); background: var(--bg-elev); }
+  .add-btn {
+    padding: 7px 11px;
+    background: var(--ink); color: var(--bg-card);
+    border: none; border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: all 150ms ease;
+    flex-shrink: 0;
+  }
+  .add-btn:hover { background: var(--ember-deep); }
+
+  /* ===== BOXES VIEW ===== */
+  .boxes-view {
+    display: grid;
+    gap: 12px;
+  }
+  .box-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--moss);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    box-shadow: var(--shadow);
+  }
+  .box-card.closed { border-left-color: var(--ink-faint); opacity: 0.85; }
+  .box-card-header {
+    display: flex; align-items: center; gap: 9px;
+    margin-bottom: 8px; flex-wrap: wrap;
+  }
+  .box-card-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px; font-weight: 700;
+    padding: 3px 9px;
+    background: var(--moss); color: white;
+    border-radius: 4px;
+  }
+  .box-card.closed .box-card-label { background: var(--ink-faint); }
+  .box-card-meta {
+    font-size: 11.5px; color: var(--ink-soft);
+    font-weight: 600;
+  }
+  .box-card-status {
+    margin-left: auto;
+    font-size: 10px; font-weight: 800;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 100px;
+  }
+  .box-card-status.open { background: var(--moss-soft); color: #3c4825; }
+  .box-card-status.closed { background: var(--line); color: var(--ink-soft); }
+  .box-card-items {
+    list-style: none;
+    padding-left: 0;
+  }
+  .box-card-items li {
+    padding: 4px 0;
+    font-size: 13px;
+    color: var(--ink);
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .box-card-items li:last-child { border-bottom: none; }
+  .box-card-actions {
+    margin-top: 10px;
+    display: flex; gap: 6px;
+  }
+  .box-action {
+    padding: 5px 11px;
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 11.5px; font-weight: 600;
+    cursor: pointer;
+    transition: all 130ms ease;
+  }
+  .box-action:hover { border-color: var(--ember); color: var(--ember); }
+  .box-search {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--line);
+    background: var(--bg-elev);
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--ink); outline: none;
+    margin-bottom: 14px;
+    transition: border-color 150ms ease;
+  }
+  .box-search:focus { border-color: var(--ember); }
+
+  /* ===== ACTIVITY VIEW ===== */
+  .activity-list {
+    list-style: none;
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .activity-list li {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--line-soft);
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13.5px;
+  }
+  .activity-list li:last-child { border-bottom: none; }
+  .activity-who {
+    font-weight: 800;
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    padding: 2px 7px;
+    border-radius: 100px;
+    flex-shrink: 0;
+    color: white;
+  }
+  .activity-who.cj { background: var(--sky); }
+  .activity-who.chelsea { background: var(--plum); }
+  .activity-who.both { background: var(--ink-faint); }
+  .activity-action {
+    color: var(--ink);
+    flex: 1;
+    min-width: 0;
+  }
+  .activity-action strong { font-weight: 700; }
+  .activity-time {
+    font-size: 11px;
+    color: var(--ink-faint);
+    flex-shrink: 0;
+  }
+
+  /* ===== FOOTER ===== */
+  .footer-actions {
+    max-width: 900px; margin: 20px auto 0;
+    padding: 0 18px;
+    display: flex; gap: 7px;
+    justify-content: flex-end; flex-wrap: wrap;
+  }
+  .btn-ghost {
+    padding: 6px 11px;
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 11px; font-weight: 600;
+    cursor: pointer;
+    transition: all 150ms ease;
+    letter-spacing: 0.02em;
+  }
+  .btn-ghost:hover { border-color: var(--ember); color: var(--ember); }
+  .btn-ghost.danger:hover { border-color: #b3331c; color: #b3331c; }
+
+  .room-done {
+    margin-top: 13px;
+    padding: 13px 17px;
+    background: var(--moss-soft);
+    border: 1px solid #c2cca5;
+    border-radius: var(--radius);
+    color: #3c4825;
+    font-size: 13.5px; font-weight: 600;
+    text-align: center;
+    display: none;
+  }
+  .room-done.show { display: block; animation: pop 350ms ease-out; }
+  .room-done span { font-family: 'Fraunces', serif; font-style: italic; font-weight: 500; }
+
+  /* ===== TOAST ===== */
+  .toast {
+    position: fixed;
+    bottom: 16px; left: 50%;
+    transform: translateX(-50%) translateY(120px);
+    background: var(--ink); color: var(--bg-card);
+    padding: 10px 17px;
+    border-radius: 100px;
+    font-size: 13px; font-weight: 600;
+    box-shadow: var(--shadow-lg);
+    z-index: 100;
+    transition: transform 350ms cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
+    max-width: 92vw;
+    text-align: center;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast em { font-family: 'Fraunces', serif; font-style: italic; color: #f4c542; font-weight: 500; }
+
+  /* ===== MODAL ===== */
+  .modal {
+    position: fixed; inset: 0;
+    background: rgba(42, 38, 32, 0.55);
+    display: none;
+    align-items: center; justify-content: center;
+    z-index: 200;
+    padding: 18px;
+    animation: fadeIn 200ms ease;
+  }
+  .modal.show { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal-card {
+    background: var(--bg-card);
+    border-radius: 14px;
+    padding: 24px 20px 18px;
+    max-width: 400px; width: 100%;
+    max-height: 82vh; overflow-y: auto;
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+    animation: pop 350ms ease-out;
+  }
+  .modal-eyebrow {
+    font-size: 10.5px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ember); margin-bottom: 7px;
+  }
+  .pick-item {
+    font-family: 'Fraunces', serif;
+    font-weight: 600; font-size: 22px;
+    letter-spacing: -0.01em; line-height: 1.2;
+    margin-bottom: 3px;
+  }
+  .pick-from {
+    font-size: 12px; color: var(--ink-soft);
+    margin-bottom: 6px; font-style: italic;
+  }
+  .pick-question {
+    font-size: 13px; color: var(--ink-soft);
+    margin-bottom: 16px;
+  }
+  .pick-question strong {
+    font-family: 'Fraunces', serif; font-style: italic;
+    color: var(--ember); font-weight: 500;
+  }
+  .triage-actions {
+    display: flex; gap: 5px;
+    margin-bottom: 7px;
+  }
+  .triage-actions button {
+    flex: 1; padding: 11px 8px;
+    border: none; border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 12.5px; font-weight: 700;
+    cursor: pointer;
+    transition: all 150ms ease;
+    color: white;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+  }
+  .triage-actions .ta-icon { font-size: 17px; line-height: 1; }
+  .triage-actions .ta-keep { background: var(--ember); }
+  .triage-actions .ta-sell { background: var(--honey); }
+  .triage-actions .ta-toss { background: var(--slate); }
+  .pick-skip-row { text-align: center; margin-top: 4px; }
+  .pick-skip {
+    padding: 7px 14px;
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 12px; font-weight: 600;
+    cursor: pointer;
+  }
+
+  .pile-card { text-align: left; }
+  .pile-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 600; font-size: 21px;
+    margin-bottom: 3px;
+  }
+  .pile-subtitle {
+    font-size: 12px; color: var(--ink-soft);
+    margin-bottom: 14px;
+  }
+  .pile-list {
+    list-style: none;
+    margin: 0 -20px;
+    border-top: 1px solid var(--line-soft);
+  }
+  .pile-list li {
+    padding: 9px 20px;
+    border-bottom: 1px solid var(--line-soft);
+    font-size: 13.5px;
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 11px;
+  }
+  .pile-list li .pile-from {
+    font-size: 10.5px; color: var(--ink-faint);
+    font-style: italic;
+  }
+  .pile-list li .pile-box {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; font-weight: 700;
+    padding: 1.5px 5px;
+    background: var(--moss); color: white;
+    border-radius: 3px;
+  }
+  .pile-empty {
+    text-align: center;
+    color: var(--ink-faint);
+    font-style: italic;
+    padding: 28px 10px;
+  }
+  .modal-close-row { margin-top: 14px; text-align: right; }
+
+  @media (max-width: 600px) {
+    .header { padding: 10px 14px 8px; }
+    .title { font-size: 15px; }
+    .focus-bar { padding: 7px 14px; }
+    .tabs { padding: 6px 14px; }
+    main { padding: 16px 14px 32px; }
+    .room-title { font-size: 22px; }
+    .room-eyebrow { font-size: 10px; }
+    .section-header { padding: 9px 12px; }
+    .section-title { font-size: 14.5px; }
+    .item { padding: 7px 10px; gap: 7px; }
+    .item-label { font-size: 13.5px; }
+    .action-btn { width: 25px; height: 25px; }
+    .add-row { padding: 6px 10px 9px; }
+    .footer-actions { padding: 0 14px; }
+    .pick-item { font-size: 19px; }
+    .streak-pill { display: none !important; }
+    .tally { font-size: 10.5px; padding: 2px 7px; }
+    .valuables-header { padding: 11px 13px 9px; }
+    .ashes-banner { margin: 9px 13px 0; padding: 10px 12px; font-size: 12.5px; }
+    .valuable-item { padding: 11px 13px; }
+    .activity-ticker { padding: 6px 14px; font-size: 11.5px; }
+  }
+  @media print {
+    .focus-bar, .tabs-wrap, .footer-actions,
+    .add-row, .chevron, .activity-ticker,
+    .toast, .modal, .action-btns { display: none !important; }
+    .header { position: static; }
+    .section.collapsed .section-body { max-height: none; padding: 5px 0 9px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ SETUP WIZARD ============ -->
+<div class="setup" id="setup">
+  <div class="setup-card">
+    <div class="setup-eyebrow">First-time setup</div>
+    <h1 class="setup-title">3-Day <em>Sprint</em></h1>
+    <p class="setup-sub">A synced packing app for two people, one move, three days. Setup takes about 5 minutes — once.</p>
+
+    <!-- Step 1: Firebase config -->
+    <div class="setup-step active" id="setupStep1">
+      <div class="setup-help">
+        <strong>Step 1: Get your Firebase config.</strong><br>
+        1. Go to <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a> → <em>Add project</em><br>
+        2. Skip Google Analytics (not needed)<br>
+        3. Click the web icon <code>&lt;/&gt;</code> → register an app<br>
+        4. Copy the <code>firebaseConfig</code> object<br>
+        5. In the left sidebar: <em>Build → Realtime Database</em> → Create database → start in <strong>test mode</strong><br>
+        6. Paste your config below.
+      </div>
+      <div class="setup-error" id="setupError1"></div>
+      <label class="setup-label">Paste your firebaseConfig here</label>
+      <textarea class="setup-textarea" id="firebaseConfigInput" placeholder='{
+  "apiKey": "AIza...",
+  "authDomain": "your-project.firebaseapp.com",
+  "databaseURL": "https://your-project-default-rtdb.firebaseio.com",
+  "projectId": "your-project",
+  ...
+}'></textarea>
+      <div class="setup-actions">
+        <span></span>
+        <button class="setup-btn" onclick="saveFirebaseConfig()">Continue →</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Room code -->
+    <div class="setup-step" id="setupStep2">
+      <div class="setup-help">
+        <strong>Step 2: Room code.</strong><br>
+        This is the shared space where both phones sync. CJ creates one and shares it with Chelsea — she enters the same code on her phone.
+      </div>
+      <label class="setup-label">Create or join a room</label>
+      <input class="setup-input large" id="roomCodeInput" placeholder="ROOM CODE" maxlength="10" style="text-transform: uppercase;">
+      <div class="setup-actions">
+        <button class="setup-btn ghost" onclick="generateRoomCode()">Generate new code</button>
+        <button class="setup-btn" onclick="saveRoomCode()">Continue →</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Who are you -->
+    <div class="setup-step" id="setupStep3">
+      <div class="setup-help">
+        <strong>Step 3: Who's on this phone?</strong><br>
+        Each phone identifies as one person. Your checks will show up in your color so the other person knows who packed what.
+      </div>
+      <div class="person-pick">
+        <button class="cj" onclick="savePerson('cj')">CJ</button>
+        <button class="chelsea" onclick="savePerson('chelsea')">Chelsea</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Share -->
+    <div class="setup-step" id="setupStep4">
+      <div class="setup-help">
+        <strong>You're connected.</strong> Share this room code with the other person — they enter it on their phone and you'll see each other's progress in real time.
+      </div>
+      <div class="room-code-display">
+        <div class="room-code-eyebrow">Your room code</div>
+        <div class="room-code-value" id="roomCodeDisplay"></div>
+        <div class="room-code-share">Copy this and text it to the other person.</div>
+      </div>
+      <div class="setup-actions">
+        <span></span>
+        <button class="setup-btn" onclick="finishSetup()">Start packing →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div class="app" id="app">
+  <header class="header">
+    <div class="header-inner">
+      <div class="title-row">
+        <div class="title">3-Day <em>Sprint</em></div>
+        <div class="users-strip" id="usersStrip"></div>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-keep" id="progressKeep"></div>
+        <div class="progress-sell" id="progressSell"></div>
+        <div class="progress-toss" id="progressToss"></div>
+      </div>
+      <div class="tallies">
+        <span class="tally keep" onclick="openPile('keep')"><span class="tally-dot"></span>Keep <span id="countKeep">0</span></span>
+        <span class="tally sell" onclick="openPile('sell')"><span class="tally-dot"></span>Sell <span id="countSell">0</span></span>
+        <span class="tally toss" onclick="openPile('toss')"><span class="tally-dot"></span>Toss <span id="countToss">0</span></span>
+        <span class="tally pending"><span class="tally-dot"></span>Left <span id="countPending">0</span></span>
+        <span class="tally boxes"><span class="tally-dot"></span><span id="countBoxes">0</span> boxes</span>
+      </div>
+      <div class="sprint-bar" id="sprintBar"></div>
+    </div>
+  </header>
+
+  <div class="activity-ticker empty" id="activityTicker"></div>
+
+  <div class="focus-bar" id="focusBar">
+    <div class="focus-inner">
+      <div class="timer-wrap" id="timerWrap">
+        <span class="timer-dot"></span>
+        <span class="timer-mode" id="timerMode">Ready</span>
+        <span class="timer-display" id="timerDisplay">25:00</span>
+        <button class="icon-btn" id="timerToggle">
+          <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20"></polygon></svg>
+          <svg id="pauseIcon" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+        </button>
+        <button class="icon-btn" id="timerReset">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+        </button>
+      </div>
+      <button class="pick-btn" id="pickBtn">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.2" fill="currentColor"></circle><circle cx="15.5" cy="15.5" r="1.2" fill="currentColor"></circle><circle cx="15.5" cy="8.5" r="1.2" fill="currentColor"></circle><circle cx="8.5" cy="15.5" r="1.2" fill="currentColor"></circle><circle cx="12" cy="12" r="1.2" fill="currentColor"></circle></svg>
+        Triage one
+      </button>
+      <div class="streak-pill" id="streakPill">🔥 <span id="streakCount">0</span> in a row</div>
+    </div>
+  </div>
+
+  <div class="tabs-wrap" id="tabsWrap">
+    <div class="tabs" id="tabs"></div>
+  </div>
+
+  <main id="main"></main>
+
+  <div class="footer-actions">
+    <button class="btn-ghost" onclick="collapseAll()">Collapse all</button>
+    <button class="btn-ghost" onclick="expandAll()">Expand all</button>
+    <button class="btn-ghost" onclick="window.print()">Print</button>
+    <button class="btn-ghost danger" onclick="resetSetup()">Reset / change room</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Triage modal -->
+<div class="modal" id="pickModal">
+  <div class="modal-card">
+    <div class="modal-eyebrow">Your next decision</div>
+    <div class="pick-item" id="pickItemLabel"></div>
+    <div class="pick-from" id="pickItemFrom"></div>
+    <div class="pick-question">Do we <strong>really</strong> need this?</div>
+    <div class="triage-actions">
+      <button class="ta-keep" onclick="triagePick('keep')"><span class="ta-icon">📦</span><span>Keep</span></button>
+      <button class="ta-sell" onclick="triagePick('sell')"><span class="ta-icon">💰</span><span>Sell</span></button>
+      <button class="ta-toss" onclick="triagePick('toss')"><span class="ta-icon">🗑</span><span>Toss</span></button>
+    </div>
+    <div class="pick-skip-row">
+      <button class="pick-skip" onclick="closePick()">Skip — decide later</button>
+    </div>
+  </div>
+</div>
+
+<!-- Pile viewer modal -->
+<div class="modal" id="pileModal">
+  <div class="modal-card pile-card">
+    <div class="pile-title" id="pileTitle"></div>
+    <div class="pile-subtitle" id="pileSubtitle"></div>
+    <ul class="pile-list" id="pileList"></ul>
+    <div class="modal-close-row">
+      <button class="btn-ghost" onclick="closePileModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   DATA
+   ============================================================ */
+const ROOMS = [
+  { id: 'porch', label: 'Porch', title: 'Porch', day: 1,
+    note: 'Far corner. Empty first — opens up the master bedroom flow.',
+    sections: [
+      { title: 'Plants', short: 'Porch-Plants', items: ['Herbs', 'Houseplants', 'Flowering plants', 'Succulents & cacti', 'Anything in propagation'] },
+      { title: 'Plant care', short: 'Porch-Plantcare', items: ['Watering can', 'Spray bottles', 'Pruning shears', 'Plant food / fertilizer', 'Empty pots & saucers', 'Bagged soil', 'Plant stakes & ties'] },
+      { title: 'Porch items', short: 'Porch-Misc', items: ['Outdoor cushions', 'Small side tables / stools', 'String lights', 'Welcome mat', 'Outdoor decor', 'Grill tools', 'Anything stashed out here'] },
+    ]
+  },
+  { id: 'master', label: 'Master', title: 'Master Bedroom (10.6 × 14.3)', day: 1,
+    note: "Empty drawers — don't sort, just decide and box. EVERYTHING gets a decision.",
+    sections: [
+      { title: 'CJ — clothing', short: 'CJ-Clothes', items: ['Tops & t-shirts', 'Long-sleeves & sweaters', 'Pants & jeans', 'Shorts', 'Undergarments & socks', 'Sleepwear', 'Workout clothes', 'Coats & jackets', 'Belts, hats'] },
+      { title: 'Chelsea — clothing', short: 'C-Clothes', items: ['Tops & shirts', 'Pants, skirts, dresses', 'Sweaters & cardigans', 'Undergarments & socks', 'Sleepwear', 'Workout clothes', 'Coats & jackets', 'Scarves & accessories'] },
+      { title: 'Shoes — both', short: 'Shoes', items: ['CJ — everyday', 'CJ — work / kitchen', 'CJ — dress', 'Chelsea — everyday', 'Chelsea — dress / heels', 'Chelsea — athletic', 'Slippers / house shoes', 'Boots'] },
+      { title: 'Bedding', short: 'Master-Bedding', items: ['Sheets in use', 'Extra sheet sets', 'Pillows', 'Pillowcases', 'Comforter / duvet', 'Throw blankets', 'Mattress protector'] },
+      { title: 'Nightstands', short: 'Master-Nightstand', items: ['Lamps', 'Alarm clock', 'Chargers', 'Books', 'Lotions, chapstick, tissues', "CJ's drawer", "Chelsea's drawer"] },
+      { title: 'Personal & valuables', short: 'Master-Personal', items: ['Jewelry & jewelry box', 'Watches', 'Wallets & purses', 'Sunglasses', 'Backup eyeglasses', 'Loose hangers'] },
+      { title: 'Closet & under-bed', short: 'Master-Closet', items: ['Hanging clothes — CJ', 'Hanging clothes — Chelsea', 'Closet floor / shelves', 'Under-bed storage bins', 'Laundry hamper contents'] },
+    ]
+  },
+  { id: 'hallway', label: 'Hallway', title: 'Hallway, Furnace Closet & Linen', day: 1,
+    note: 'Catch-all. Anything porous near HVAC: mold-check before boxing.',
+    sections: [
+      { title: 'Linens & supplies', short: 'Hall-Linens', items: ['Spare bedding sets', 'Extra towels & washcloths', 'Toilet paper stockpile', 'Paper towels stockpile', 'Tissues'] },
+      { title: 'Furnace closet', short: 'Hall-Furnace', items: ['Spare HVAC filters', 'Vacuum & attachments', 'Vacuum bags / accessories', 'Anything stashed in here', 'Seasonal items'] },
+      { title: 'Cleaning & tools', short: 'Hall-Tools', items: ['Broom & dustpan', 'Mop & bucket', 'Small toolkit', 'Tape, glue, scissors', 'Lightbulbs', 'Batteries'] },
+      { title: 'Important & sentimental (always Keep)', short: 'Hall-Documents', items: ['File box — paperwork', "Chelsea's important documents", "Baby's documents (SS card, birth cert)", 'Insurance & lease paperwork', 'Tax records', 'Sentimental keepsakes', 'Photo albums'] },
+      { title: 'Other shelves', short: 'Hall-Misc', items: ['Camera & accessories', 'Holiday decorations', 'Coat hook contents', 'Shoe rack contents'] },
+    ]
+  },
+  { id: 'nursery', label: 'Nursery', title: 'Nursery (11.6 × 10.8)', day: 2,
+    note: 'Pre-load a 2-day diaper bag FIRST. That bag stays with you, not in the truck.',
+    sections: [
+      { title: 'Move-day diaper bag (FIRST)', short: 'Nursery-Bag', items: ['2 days of diapers', 'Wipes', 'Diaper cream', '3-4 outfits', '2 sleepers', 'Bottles & formula or feeding gear', 'Pacifiers', 'Favorite stuffy / blanket', 'Snacks & water', 'Tylenol / medicine'] },
+      { title: 'Clothing — current size', short: 'Nursery-Clothes', items: ['Onesies & bodysuits', 'Sleepers / pajamas', 'Outfits in rotation', 'Socks, mittens, hats', 'Outerwear'] },
+      { title: 'Clothing — next size + stored', short: 'Nursery-ClothesNext', items: ['Next-size tops, bottoms, onesies', 'Next-size sleepwear', 'Outerwear', 'Anything in storage bins', 'Outgrown clothes (sell or donate)'] },
+      { title: 'Diapering', short: 'Nursery-Diaper', items: ['Diapers — current size', 'Diapers — next size', 'Wipes (full supply)', 'Diaper cream', 'Changing pad covers', 'Diaper pail & liners'] },
+      { title: 'Feeding', short: 'Nursery-Feed', items: ['Bottles & nipples', 'Formula or pumping supplies', 'Bibs', 'Burp cloths', 'Sippy cups', 'High chair tray & accessories'] },
+      { title: 'Bath & care', short: 'Nursery-Bath', items: ['Baby shampoo / wash', 'Baby lotion', 'Hooded towels', 'Baby washcloths', 'Nail clippers', 'Brush & comb', 'Thermometer, medicine syringe'] },
+      { title: 'Sleep gear', short: 'Nursery-Sleep', items: ['Crib sheets', 'Swaddles / sleep sacks', 'Sound machine', 'Nightlight', 'Baby monitor', 'Mobile'] },
+      { title: 'Toys & books', short: 'Nursery-Toys', items: ['Stuffed animals', 'Rattles & teethers', 'Activity toys', 'Books', 'Play mat / activity gym', 'Pacifiers & clips'] },
+      { title: 'Shelf & dresser contents', short: 'Nursery-Shelves', items: ['Top shelf', 'Middle shelves', 'Lower shelves / baskets', 'Dresser drawer contents'] },
+    ]
+  },
+  { id: 'bathroom', label: 'Bathroom', title: 'Bathroom (7.4 × 7.7)', day: 2,
+    note: 'Bag liquids. TOSS anything moldy or from a damp cabinet.',
+    sections: [
+      { title: 'Daily toiletries', short: 'Bath-Daily', items: ['Shampoo & conditioner', 'Body wash / bar soap', 'Razors & shaving cream', 'Toothbrushes & toothpaste', 'Floss & mouthwash', 'Deodorant', 'Lotion & body oils', 'Sunscreen', 'Expired / sketchy (toss!)'] },
+      { title: 'Hair tools', short: 'Bath-Hair', items: ['Hair dryer', 'Straightener / curling iron', 'Brushes & combs', 'Hair ties, clips, accessories'] },
+      { title: 'Chelsea — makeup & skincare', short: 'Bath-Makeup', items: ['Daily makeup bag', 'Backup / overflow makeup', 'Skincare bottles & jars', 'Cotton pads, Q-tips', 'Nail polish & remover', 'Expired makeup (toss!)'] },
+      { title: 'Medications & first aid', short: 'Bath-Meds', items: ['Prescription meds', "Chelsea's prescriptions / supplements", 'OTC pain relief', "CJ's supplement stack", 'Cold / allergy meds', 'Band-aids, antibiotic ointment', 'Thermometer'] },
+      { title: 'Linens (TOSS if moldy)', short: 'Bath-Linens', items: ['Bath towels', 'Hand towels', 'Washcloths', 'Bath mats', 'Shower curtain & liner', 'Curtain rings & rod'] },
+      { title: 'Other', short: 'Bath-Misc', items: ['Toilet paper supply', 'Tissues', 'Plunger', 'Toilet brush', 'Trash can', 'Scale', 'Shelf contents'] },
+    ]
+  },
+  { id: 'livingroom', label: 'Living Room', title: 'Living Room (23 × 13.3)', day: 2,
+    note: 'Staging area for all boxes — tarp the corner first. Valuables get special handling above.',
+    hasValuables: true,
+    sections: [
+      { title: 'Electronics & cables', short: 'LR-Electronics', items: ['Remote controls (bag together)', 'Game consoles', 'Game controllers & cables', 'Game discs / cartridges', 'Streaming devices', 'HDMI cables', 'Power cables & adapters', 'Surge protectors', 'Soundbar / speakers'] },
+      { title: 'Books, games, media', short: 'LR-Books', items: ['Books on shelves', 'DVDs / Blu-rays', 'Board games & card games', 'Puzzles', 'Vinyl / CDs', 'Unread books 2+ years', 'Games no one plays'] },
+      { title: 'Decor & lighting', short: 'LR-Decor', items: ['Picture frames (wrap glass)', 'Wall art — small pieces', 'Candles & holders', 'Decorative objects', 'Vases', 'Lamps (bag shades)'] },
+      { title: 'Soft goods', short: 'LR-Soft', items: ['Throw pillows', 'Throw blankets', 'Small accent rugs', 'Curtains & rods', 'Pet beds & blankets'] },
+      { title: 'Shelf & furniture contents', short: 'LR-Shelves', items: ['Hallway-adjacent shelves', 'TV stand drawers', 'Coffee table contents', 'Side table drawers', 'Under furniture'] },
+    ]
+  },
+  { id: 'tech', label: 'Tech', title: 'Tech & Office', day: 2,
+    note: 'Photo every cable setup BEFORE unplugging. Computers & speakers are valuables — see Living Room.',
+    sections: [
+      { title: 'Computer 1 — peripherals', short: 'Tech-PC1', items: ['Monitor(s) — wrap screen', 'Keyboard', 'Mouse & mousepad', 'Headphones / headset', 'Webcam', 'Microphone & boom arm', 'Speakers', 'Cables in labeled bag'] },
+      { title: 'Computer 2 — peripherals', short: 'Tech-PC2', items: ['Monitor(s) — wrap screen', 'Keyboard', 'Mouse & mousepad', 'Headphones / headset', 'Webcam', 'Microphone', 'Speakers', 'Cables in labeled bag'] },
+      { title: 'Storage & accessories', short: 'Tech-Storage', items: ['External hard drives', 'USB hubs / docks', 'Flash drives', 'Drawing tablet', 'Surge protectors'] },
+      { title: 'Chargers & cables', short: 'Tech-Cables', items: ['Phone chargers (every one)', 'Laptop chargers', 'USB-C / Lightning', 'Tablet / e-reader chargers', 'Cable bag — label everything', "Unrecognized cables (probably toss)"] },
+      { title: 'Office / other', short: 'Tech-Office', items: ['Office supplies', 'Smart home devices', 'Wi-Fi router & modem (pack LAST)'] },
+    ]
+  },
+  { id: 'entry', label: 'Entry', title: 'Entry / Coat Area', day: 3,
+    note: "Where every box flows out. Pack last so it doesn't clog.",
+    sections: [
+      { title: 'Daily-use', short: 'Entry', items: ['Coats by door', 'Shoes by door', 'Umbrellas', 'Keys & mail catch-all', 'Doormat (interior)', 'Entry shelf / hook contents'] },
+    ]
+  },
+  { id: 'kitchen', label: 'Kitchen', title: 'Kitchen', day: 3,
+    note: 'Dirty dishes FIRST. Triage hard — kitchen has the most "do we use this?" candidates.',
+    sections: [
+      { title: 'STEP 1: Dirty dishes', short: 'K-Wash', items: ['Wash everything in sink', 'Wash everything on counter', 'Run a dishwasher load', 'Dry & pack as you go', 'Bag sponge / scrubbers separately'] },
+      { title: 'Dishware', short: 'K-Dishes', items: ['Dinner plates', 'Salad / dessert plates', 'Bowls', 'Mugs & coffee cups', 'Drinking glasses', 'Wine glasses', 'Specialty / display pieces', 'Chipped or mismatched (toss)'] },
+      { title: 'Silverware & utensils', short: 'K-Silverware', items: ['Forks, knives, spoons', 'Serving utensils', 'Steak knives', 'Chopsticks', 'Wooden spoons & spatulas', 'Tongs, whisks, ladles', 'Measuring cups & spoons', 'Duplicates (sell or toss)'] },
+      { title: 'Knives & cutting', short: 'K-Knives', items: ['Chef knives (WRAP BLADES)', 'Paring & utility knives', 'Bread knife', 'Honing steel / sharpener', 'Knife block / magnetic strip', 'Cutting boards', 'Kitchen shears'] },
+      { title: 'Cookware', short: 'K-Cookware', items: ['Pots — small / medium / large', 'Skillets & sauté pans', 'Cast iron (wrap + oil)', 'Dutch oven', 'Stockpot', 'Baking sheets', 'Cake pans, muffin tins', 'Pyrex / glass bakeware', 'Mixing bowls', 'Beat-up / rarely used (sell)'] },
+      { title: 'Small appliances', short: 'K-Appliances', items: ['Coffee maker / espresso', 'Electric kettle', 'Toaster / toaster oven', 'Blender', 'Food processor', 'Stand mixer', 'Immersion blender', 'Slow cooker / Instant Pot', 'Air fryer', 'Sous vide / thermometer', 'Unused 6+ months (sell)'] },
+      { title: 'Storage & wrap', short: 'K-Storage', items: ['Tupperware bases', 'Tupperware lids', 'Mason jars', 'Aluminum foil', 'Plastic wrap', 'Parchment paper', 'Zip bags (all sizes)', 'Trash bags', 'Lidless tupperware (toss)'] },
+      { title: 'Pantry — dry goods', short: 'K-Pantry', items: ['Flour, sugar, baking supplies', 'Pasta, rice, grains, beans', 'Canned goods', 'Oils & vinegars', 'Honey, syrups, condiments', 'Snacks', 'Coffee beans / grounds', 'Tea', 'Expired (toss)'] },
+      { title: 'Spices & seasonings (CROWN JEWELS)', short: 'K-Journeaux', items: ['Journeaux Atelier salts & blends', 'Hot sauces — yours', 'Hot sauces — commercial', 'Whole spices', 'Ground spices', 'Dried herbs', 'Specialty / hard-to-replace', 'Spice rack hardware'] },
+      { title: 'Bar / dining area', short: 'K-Bar', items: ['Placemats, napkins', 'Coasters', 'Table runners', 'Barware (shakers, jiggers, strainers)', 'Bar towels'] },
+      { title: 'Soft goods & cleaning', short: 'K-Soft', items: ['Dish towels', 'Pot holders & oven mitts', 'Aprons', 'Counter cleaner', 'Dish rack', 'Paper towels'] },
+      { title: 'Fridge & freezer (DAY 3)', short: 'K-Fridge', items: ['Toss anything questionable', 'Defrost freezer overnight', 'Condiments → cooler', 'Dairy → cooler w/ ice packs', 'Produce (pack last)', 'Drinks'] },
+    ]
+  },
+  { id: 'cleaning', label: 'Cleaning', title: 'Cleaning Checklist', day: 3, isCleaning: true,
+    note: "Do each room AFTER it's empty. Photos before AND after for the deposit.",
+    sections: [
+      { title: 'Before anything (set up)', short: 'Clean-Prep', items: ['Take "before" photos every room', 'Photo any visible mold', 'Email photos to yourself', "Set aside cleaning supplies — don't pack", 'Trash bags ready'] },
+      { title: 'Master Bedroom (after empty)', short: 'Clean-Master', items: ['Vacuum floor (under bed too)', 'Wipe baseboards', 'Wipe ceiling fan / lights', 'Clean windows & sills', 'Wipe inside closet', 'Wipe walls if needed', 'Spot-check for mold'] },
+      { title: 'Nursery (after empty)', short: 'Clean-Nursery', items: ['Vacuum floor', 'Wipe baseboards', 'Wipe ceiling fan / light', 'Clean window & sill', 'Wipe inside closet', 'Wipe walls if needed', 'Spot-check for mold'] },
+      { title: 'Bathroom (after empty)', short: 'Clean-Bath', items: ['Scrub toilet (inside, outside, base)', 'Scrub tub / shower', 'Clean shower walls', 'Replace shower curtain', 'Scrub sink & faucet', 'Wipe mirror', 'Clean inside vanity', 'Wipe baseboards', 'Mop floor', 'Photo any mold found'] },
+      { title: 'Kitchen (after empty)', short: 'Clean-Kitchen', items: ['Empty & wipe fridge interior', 'Defrost & wipe freezer', 'Wipe fridge exterior + top', 'Clean oven interior', 'Clean stovetop & under burners', 'Wipe range hood', 'Clean microwave', 'Wipe ALL cabinet interiors', 'Wipe cabinet exteriors', 'Scrub sink & faucet', 'Wipe countertops', 'Clean dishwasher interior', 'Wipe baseboards', 'Mop floor'] },
+      { title: 'Living Room (after empty)', short: 'Clean-LR', items: ['Vacuum entire floor', 'Vacuum corners & edges', 'Wipe baseboards', 'Clean windows & sills', 'Wipe ceiling fan / lights', 'Wipe walls if needed', 'Clean patio door & track'] },
+      { title: 'Porch', short: 'Clean-Porch', items: ['Sweep thoroughly', 'Wipe down railing', 'Clean any glass', 'Remove all debris'] },
+      { title: 'Hallway & furnace closet', short: 'Clean-Hall', items: ['Vacuum hallway', 'Wipe baseboards', 'Wipe inside furnace closet', 'Replace HVAC filter'] },
+      { title: 'Entry', short: 'Clean-Entry', items: ['Sweep / vacuum', 'Wipe door inside & out', 'Wipe baseboards'] },
+      { title: 'Final walk-through', short: 'Clean-Final', items: ['Take "after" photos every room', 'Check every closet, drawer, cabinet', 'Check porch one more time', 'Lights off, thermostat set', 'Keys ready to return', 'Forwarding address confirmed (USPS)'] },
+    ]
+  },
+];
+
+const VALUABLES = [
+  { id: 'sister-ashes', name: "Sister's ashes", critical: true,
+    note: 'In the car. Padded. Never in a box. Never in storage. Travels with you, not the truck.',
+    tasks: ['Wrap in dedicated cloth', 'Place in padded container (rigid sides)', 'Set aside in the car — not the truck', 'Confirm Chelsea knows where they are'] },
+  { id: 'dad-ashes', name: "Chelsea's dad's ashes", critical: true,
+    note: 'In the car. Padded. Never in a box. Never in storage. Travels with you, not the truck.',
+    tasks: ['Wrap in dedicated cloth', 'Place in padded container (rigid sides)', 'Set aside in the car — not the truck', 'Confirm Chelsea is comfortable with handling'] },
+  { id: 'gamersupps', name: 'Gamersupps cup collection (unopened)',
+    note: 'Sealed = collectible value. Originals in original boxes if you have them. No stacking weight. Climate-controlled storage only.',
+    tasks: ['Photograph the full collection (insurance)', 'Photograph each cup individually', 'Bubble wrap each cup', 'Pack upright in a dedicated box', 'Mark "FRAGILE — DO NOT STACK"', 'Note serial numbers / variants in phone'] },
+  { id: 'halo', name: 'Halo collectibles',
+    note: 'Paint apps and PVC warp in heat. Climate-controlled storage only. Original packaging preserves value.',
+    tasks: ['Photograph each piece (insurance)', 'Original boxes if available', 'Bubble wrap if no original box', 'Pack in dedicated box — no mixing', 'Mark "FRAGILE — VALUABLE"'] },
+  { id: 'computer-1', name: 'Computer 1 (tower + monitor)',
+    note: 'Original box if you have it. Otherwise dense foam + double-box. SSDs are shock-sensitive.',
+    tasks: ['Back up critical files to external + cloud', 'Photograph all cable connections', 'Label every cable for this tower', 'Original box OR double-box with foam', 'Monitor: original box ideal, screen wrapped', 'Climate-controlled storage only'] },
+  { id: 'computer-2', name: 'Computer 2 (tower + monitor)',
+    note: 'Same protocol as Computer 1. Keep separate in storage if possible.',
+    tasks: ['Back up critical files to external + cloud', 'Photograph all cable connections', 'Label every cable for this tower', 'Original box OR double-box with foam', 'Monitor: original box ideal, screen wrapped', 'Climate-controlled storage only'] },
+  { id: 'speakers', name: 'Speakers',
+    note: 'Cones and tweeters are fragile. Original boxes preferred.',
+    tasks: ['Photograph (insurance)', 'Original boxes if available', 'Bubble wrap drivers / cones', 'Pack upright, no weight on top'] },
+  { id: 'tv-1', name: 'TV #1',
+    note: 'Screens crack from pressure, not impact. Moving blanket + original box if possible.',
+    tasks: ['Photograph (note model & serial)', 'Original box if available', 'Moving blanket + tape if no box', 'Transport SCREEN-VERTICAL (never flat)', 'Mark "FRAGILE — THIS SIDE UP"'] },
+  { id: 'tv-2', name: 'TV #2',
+    note: 'Same protocol. Screen vertical, not flat.',
+    tasks: ['Photograph (note model & serial)', 'Original box if available', 'Moving blanket + tape if no box', 'Transport SCREEN-VERTICAL (never flat)', 'Mark "FRAGILE — THIS SIDE UP"'] },
+  { id: 'printer', name: 'Printer',
+    note: 'Remove ink/toner before moving — they leak. Lock the print head if possible.',
+    tasks: ['Remove ink / toner cartridges', 'Bag cartridges separately', 'Lock print head (per manual)', 'Tape paper trays shut', 'Box upright'] },
+];
+
+/* ============================================================
+   CONFIG + SETUP
+   ============================================================ */
+const LS = {
+  config: 'cj-pack-v4-firebaseConfig',
+  room: 'cj-pack-v4-roomCode',
+  person: 'cj-pack-v4-person',
+};
+let firebaseApp = null;
+let db = null;
+let dbRef = null;
+let myName = null;
+let roomCode = null;
+
+function checkSetupComplete() {
+  const cfg = localStorage.getItem(LS.config);
+  const room = localStorage.getItem(LS.room);
+  const person = localStorage.getItem(LS.person);
+  if (cfg && room && person) {
+    try {
+      const config = JSON.parse(cfg);
+      initFirebase(config);
+      roomCode = room;
+      myName = person;
+      hookDb();
+      showApp();
+      return true;
+    } catch (e) {
+      console.error('Setup load failed', e);
+      return false;
+    }
+  }
+  return false;
+}
+
+function initFirebase(config) {
+  if (firebaseApp) return;
+  firebaseApp = firebase.initializeApp(config);
+  db = firebase.database();
+}
+
+function showSetupStep(n) {
+  ['1','2','3','4'].forEach(i => {
+    document.getElementById('setupStep' + i).classList.toggle('active', i === String(n));
+  });
+}
+
+function saveFirebaseConfig() {
+  const txt = document.getElementById('firebaseConfigInput').value.trim();
+  const errEl = document.getElementById('setupError1');
+  errEl.classList.remove('show');
+  if (!txt) {
+    errEl.textContent = 'Paste the firebaseConfig object first.';
+    errEl.classList.add('show');
+    return;
+  }
+
+  // Strip JS line comments (// ...) and block comments (/* ... */)
+  // so leading "// For Firebase JS SDK..." doesn't break parsing.
+  let cleaned = txt
+    .replace(/\/\/.*$/gm, '')
+    .replace(/\/\*[\s\S]*?\*\//g, '');
+
+  // Find first { and balance braces to extract just the object literal.
+  // Tolerates extra junk before/after (imports, initializeApp calls, etc).
+  let objLiteral = null;
+  const start = cleaned.indexOf('{');
+  if (start !== -1) {
+    let depth = 0;
+    for (let i = start; i < cleaned.length; i++) {
+      if (cleaned[i] === '{') depth++;
+      else if (cleaned[i] === '}') {
+        depth--;
+        if (depth === 0) { objLiteral = cleaned.substring(start, i + 1); break; }
+      }
+    }
+  }
+
+  if (!objLiteral) {
+    errEl.textContent = "Couldn't find a { ... } block. Make sure you copied the firebaseConfig.";
+    errEl.classList.add('show');
+    return;
+  }
+
+  let config;
+  try {
+    // JS object literal (unquoted keys) — evaluate as expression.
+    config = (new Function('return (' + objLiteral + ')'))();
+  } catch (e) {
+    errEl.textContent = "Parse error: " + e.message + ". Try copying just the { ... } part.";
+    errEl.classList.add('show');
+    return;
+  }
+
+  if (!config || typeof config !== 'object') {
+    errEl.textContent = "That didn't parse into a config object. Try again with just the { ... } block.";
+    errEl.classList.add('show');
+    return;
+  }
+  if (!config.apiKey) {
+    errEl.textContent = "Missing apiKey. Re-copy from Firebase Console → Project Settings → your web app → Config.";
+    errEl.classList.add('show');
+    return;
+  }
+  if (!config.databaseURL) {
+    errEl.textContent = "Missing databaseURL. Enable Realtime Database first (Build → Realtime Database → Create → test mode), then re-copy the config.";
+    errEl.classList.add('show');
+    return;
+  }
+  try {
+    initFirebase(config);
+    localStorage.setItem(LS.config, JSON.stringify(config));
+    showSetupStep(2);
+  } catch (e) {
+    errEl.textContent = 'Firebase init failed: ' + e.message;
+    errEl.classList.add('show');
+  }
+}
+
+function generateRoomCode() {
+  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  document.getElementById('roomCodeInput').value = code;
+}
+
+function saveRoomCode() {
+  const code = document.getElementById('roomCodeInput').value.trim().toUpperCase();
+  if (!code || code.length < 4) return;
+  roomCode = code;
+  localStorage.setItem(LS.room, code);
+  showSetupStep(3);
+}
+
+function savePerson(p) {
+  myName = p;
+  localStorage.setItem(LS.person, p);
+  document.getElementById('roomCodeDisplay').textContent = roomCode;
+  showSetupStep(4);
+}
+
+function finishSetup() {
+  hookDb();
+  showApp();
+}
+
+function showApp() {
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('app').classList.add('show');
+}
+
+function resetSetup() {
+  if (!confirm('This will sign you out of the current room. Your data stays in Firebase — you can rejoin with the same code later. Continue?')) return;
+  localStorage.removeItem(LS.room);
+  localStorage.removeItem(LS.person);
+  location.reload();
+}
+
+/* ============================================================
+   FIREBASE SYNC
+   ============================================================ */
+let state = {
+  status: {},          // itemKey -> 'keep' | 'sell' | 'toss'
+  statusBy: {},        // itemKey -> 'cj' | 'chelsea'
+  boxAssignment: {},   // itemKey -> boxId
+  boxes: {},           // boxId -> { id, short, label, sectionKey, number, closed, createdBy, createdAt }
+  activeBoxBySection: {}, // sectionKey -> boxId
+  valuableTasks: {},
+  custom: {},
+  collapsed: {},
+  activity: [],        // last N actions
+  online: {},          // person -> last seen timestamp
+};
+let view = 'rooms'; // 'rooms' | 'boxes' | 'activity'
+let activeRoom = ROOMS[0].id;
+let activeDay = null;
+
+function hookDb() {
+  if (!db || !roomCode) return;
+  dbRef = db.ref(`/rooms/${roomCode}`);
+  // Listen to remote changes
+  dbRef.on('value', snap => {
+    const v = snap.val();
+    if (v) {
+      // Merge remote state, preserving local-only fields (view, activeRoom, etc)
+      const merged = {
+        status: v.status || {},
+        statusBy: v.statusBy || {},
+        boxAssignment: v.boxAssignment || {},
+        boxes: v.boxes || {},
+        activeBoxBySection: v.activeBoxBySection || {},
+        valuableTasks: v.valuableTasks || {},
+        custom: v.custom || {},
+        collapsed: state.collapsed, // local-only
+        activity: v.activity || [],
+        online: v.online || {},
+      };
+      const prevActivityLen = state.activity.length;
+      state = merged;
+      render();
+      // Update live ticker if new activity
+      if (state.activity.length > prevActivityLen) {
+        showActivityTicker(state.activity[0]);
+      }
+    } else {
+      // No remote data yet, push initial empty state
+      pushState();
+    }
+  });
+  // Heartbeat
+  startHeartbeat();
+}
+
+let heartbeatInterval = null;
+function startHeartbeat() {
+  beat();
+  heartbeatInterval = setInterval(beat, 15000);
+  // Also when tab regains focus
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) beat();
+  });
+}
+function beat() {
+  if (!dbRef || !myName) return;
+  dbRef.child('online').child(myName).set(Date.now());
+}
+
+function pushState() {
+  if (!dbRef) return;
+  dbRef.update({
+    status: state.status,
+    statusBy: state.statusBy,
+    boxAssignment: state.boxAssignment,
+    boxes: state.boxes,
+    activeBoxBySection: state.activeBoxBySection,
+    valuableTasks: state.valuableTasks,
+    custom: state.custom,
+    activity: state.activity,
+  });
+}
+
+// Granular updates (faster, less data)
+function updateRemote(updates) {
+  if (!dbRef) return;
+  dbRef.update(updates);
+}
+
+function logActivity(action) {
+  state.activity.unshift({
+    ts: Date.now(),
+    who: myName,
+    ...action
+  });
+  state.activity = state.activity.slice(0, 50);
+  updateRemote({ activity: state.activity });
+}
+
+/* ============================================================
+   KEYS
+   ============================================================ */
+function itemKey(roomId, sIdx, iIdx) { return `${roomId}|${sIdx}|${iIdx}`; }
+function sectionKey(roomId, sIdx) { return `${roomId}|${sIdx}`; }
+function newBoxId() { return 'box_' + Math.random().toString(36).slice(2, 10); }
+
+/* ============================================================
+   BOX SYSTEM
+   ============================================================ */
+function getOrCreateActiveBox(roomId, sIdx) {
+  const sKey = sectionKey(roomId, sIdx);
+  const existingBoxId = state.activeBoxBySection[sKey];
+  if (existingBoxId && state.boxes[existingBoxId] && !state.boxes[existingBoxId].closed) {
+    return state.boxes[existingBoxId];
+  }
+  // Need to create a new one
+  const section = ROOMS.find(r => r.id === roomId).sections[sIdx];
+  const short = section.short || (section.title.replace(/[^a-zA-Z0-9]+/g, '-').slice(0, 20));
+  // Count existing boxes for this section
+  const existing = Object.values(state.boxes).filter(b => b.sectionKey === sKey);
+  const number = existing.length + 1;
+  const id = newBoxId();
+  const box = {
+    id,
+    short,
+    label: `${short}-${number}`,
+    sectionKey: sKey,
+    number,
+    closed: false,
+    createdBy: myName,
+    createdAt: Date.now(),
+  };
+  state.boxes[id] = box;
+  state.activeBoxBySection[sKey] = id;
+  return box;
+}
+
+function closeBox(roomId, sIdx) {
+  const sKey = sectionKey(roomId, sIdx);
+  const boxId = state.activeBoxBySection[sKey];
+  if (!boxId) return;
+  state.boxes[boxId].closed = true;
+  delete state.activeBoxBySection[sKey];
+  updateRemote({
+    [`boxes/${boxId}/closed`]: true,
+    [`activeBoxBySection/${sKey}`]: null,
+  });
+  const box = state.boxes[boxId];
+  showToast(`<em>Closed box.</em> Mark it: <strong>${box.label}</strong>`);
+  logActivity({ kind: 'close-box', boxLabel: box.label });
+  render();
+}
+
+function assignToBox(itemK, roomId, sIdx) {
+  const box = getOrCreateActiveBox(roomId, sIdx);
+  state.boxAssignment[itemK] = box.id;
+  return box;
+}
+
+function unassignFromBox(itemK) {
+  delete state.boxAssignment[itemK];
+}
+
+/* ============================================================
+   ITEM STATUS
+   ============================================================ */
+function setItemStatus(roomId, sIdx, iIdx, newStatus, label) {
+  const key = itemKey(roomId, sIdx, iIdx);
+  const oldStatus = state.status[key];
+  if (newStatus === null) {
+    // Unset
+    delete state.status[key];
+    delete state.statusBy[key];
+    if (state.boxAssignment[key]) {
+      delete state.boxAssignment[key];
+    }
+    const updates = {
+      [`status/${key}`]: null,
+      [`statusBy/${key}`]: null,
+      [`boxAssignment/${key}`]: null,
+    };
+    updateRemote(updates);
+  } else {
+    state.status[key] = newStatus;
+    state.statusBy[key] = myName;
+    let boxLabel = null;
+    if (newStatus === 'keep') {
+      const box = assignToBox(key, roomId, sIdx);
+      boxLabel = box.label;
+    } else if (state.boxAssignment[key]) {
+      // Changed from keep to sell/toss — unassign from box
+      delete state.boxAssignment[key];
+    }
+    const updates = {
+      [`status/${key}`]: newStatus,
+      [`statusBy/${key}`]: myName,
+      [`boxAssignment/${key}`]: boxLabel ? state.boxAssignment[key] : null,
+    };
+    // Push box if newly created
+    if (boxLabel) {
+      const boxId = state.boxAssignment[key];
+      updates[`boxes/${boxId}`] = state.boxes[boxId];
+      updates[`activeBoxBySection/${state.boxes[boxId].sectionKey}`] = boxId;
+    }
+    updateRemote(updates);
+    if (oldStatus !== newStatus) {
+      logActivity({
+        kind: 'triage',
+        decision: newStatus,
+        label,
+        boxLabel,
+        roomLabel: ROOMS.find(r => r.id === roomId).label,
+        sectionTitle: ROOMS.find(r => r.id === roomId).sections[sIdx].title,
+      });
+    }
+  }
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function render() {
+  renderUsersStrip();
+  renderSprintBar();
+  renderTabs();
+  renderActiveView();
+  updateOverallStats();
+  positionStickyBars();
+}
+
+function renderUsersStrip() {
+  const wrap = document.getElementById('usersStrip');
+  const now = Date.now();
+  const cjOnline = state.online['cj'] && (now - state.online['cj'] < 45000);
+  const chelseaOnline = state.online['chelsea'] && (now - state.online['chelsea'] < 45000);
+  wrap.innerHTML = `
+    <span class="user-chip cj ${cjOnline ? 'online' : ''} ${myName === 'cj' ? 'me' : ''}">
+      <span class="user-dot"></span>CJ
+    </span>
+    <span class="user-chip chelsea ${chelseaOnline ? 'online' : ''} ${myName === 'chelsea' ? 'me' : ''}">
+      <span class="user-dot"></span>Chelsea
+    </span>
+  `;
+}
+
+setInterval(renderUsersStrip, 10000); // refresh online state every 10s
+
+function renderSprintBar() {
+  const bar = document.getElementById('sprintBar');
+  bar.innerHTML = '';
+  const days = [
+    { day: 1, label: 'Day 1' }, { day: 2, label: 'Day 2' },
+    { day: 3, label: 'Day 3' }, { day: null, label: 'All' },
+  ];
+  days.forEach(d => {
+    const { decided, total } = dayStats(d.day);
+    const btn = document.createElement('button');
+    btn.className = 'sprint-day' + (view === 'rooms' && activeDay === d.day ? ' active' : '');
+    btn.innerHTML = `<span>${d.label}</span><span class="day-stat">${decided}/${total}</span>`;
+    btn.onclick = () => {
+      activeDay = d.day;
+      view = 'rooms';
+      const firstRoom = d.day === null ? ROOMS[0] : ROOMS.find(r => r.day === d.day);
+      if (firstRoom) activeRoom = firstRoom.id;
+      render();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+    bar.appendChild(btn);
+  });
+}
+
+function renderTabs() {
+  const wrap = document.getElementById('tabs');
+  wrap.innerHTML = '';
+  const visibleRooms = activeDay === null ? ROOMS : ROOMS.filter(r => r.day === activeDay);
+
+  visibleRooms.forEach(room => {
+    const { decided, total } = roomStats(room.id);
+    const btn = document.createElement('button');
+    btn.className = 'tab' +
+      (view === 'rooms' && activeRoom === room.id ? ' active' : '') +
+      (total > 0 && decided === total ? ' complete' : '') +
+      (room.isCleaning ? ' cleaning' : '');
+    btn.innerHTML = `<span>${room.label}</span><span class="tab-count">${decided}/${total}</span>`;
+    btn.onclick = () => {
+      view = 'rooms';
+      activeRoom = room.id;
+      render();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+    wrap.appendChild(btn);
+  });
+
+  // Special tabs
+  const boxesBtn = document.createElement('button');
+  const boxCount = Object.keys(state.boxes).length;
+  boxesBtn.className = 'tab special' + (view === 'boxes' ? ' active' : '');
+  boxesBtn.innerHTML = `<span>📦 Boxes</span><span class="tab-count">${boxCount}</span>`;
+  boxesBtn.onclick = () => { view = 'boxes'; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+  wrap.appendChild(boxesBtn);
+
+  const actBtn = document.createElement('button');
+  actBtn.className = 'tab special' + (view === 'activity' ? ' active' : '');
+  actBtn.innerHTML = `<span>📋 Activity</span><span class="tab-count">${state.activity.length}</span>`;
+  actBtn.onclick = () => { view = 'activity'; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+  wrap.appendChild(actBtn);
+}
+
+function renderActiveView() {
+  if (view === 'boxes') return renderBoxesView();
+  if (view === 'activity') return renderActivityView();
+  return renderRoom(activeRoom);
+}
+
+function renderRoom(roomId) {
+  const room = ROOMS.find(r => r.id === roomId);
+  if (!room) return;
+  const main = document.getElementById('main');
+  const { decided, total } = roomStats(roomId);
+
+  main.innerHTML = `
+    <div class="room-header">
+      <div class="room-eyebrow">${room.isCleaning ? 'After packing — clean each room as you finish' : 'Decide on every item: Keep, Sell, or Toss'}</div>
+      <h1 class="room-title">${room.title}</h1>
+      <div class="room-day-tag">Day ${room.day}${room.isCleaning ? ' · Cleaning' : ''}</div>
+      ${room.note ? `<div class="room-note">${room.note}</div>` : ''}
+    </div>
+    ${room.hasValuables ? '<div id="valuablesBlock"></div>' : ''}
+    <div id="sections"></div>
+    <div class="room-done ${decided === total && total > 0 ? 'show' : ''}">
+      <span>Done.</span> ${room.label} is ${room.isCleaning ? 'cleaned' : 'fully triaged'}.
+    </div>
+  `;
+
+  if (room.hasValuables) renderValuables();
+
+  const sectionsWrap = document.getElementById('sections');
+  room.sections.forEach((section, sIdx) => {
+    sectionsWrap.appendChild(renderSection(room.id, sIdx, section));
+  });
+}
+
+function renderValuables() {
+  const wrap = document.getElementById('valuablesBlock');
+  if (!wrap) return;
+  let html = `
+    <div class="valuables">
+      <div class="valuables-header">
+        <div class="valuables-eyebrow">Pinned · Living Room staging</div>
+        <div class="valuables-title">Valuables — Special Handling</div>
+      </div>
+      <div class="ashes-banner">
+        <strong>Ashes ride in the car.</strong>
+        Never boxed. Never in a moving truck. Never in storage. Wrap them, pad them, set them in the car before anything else moves.
+      </div>
+  `;
+  VALUABLES.forEach(v => {
+    const totalTasks = v.tasks.length;
+    const doneTasks = v.tasks.filter((_, i) => state.valuableTasks[`${v.id}|${i}`]).length;
+    html += `
+      <div class="valuable-item ${v.critical ? 'critical' : ''}">
+        <div class="valuable-name">
+          ${escapeHtml(v.name)}
+          ${v.critical ? '<span class="critical-badge">Critical</span>' : ''}
+          <span class="valuable-progress">${doneTasks}/${totalTasks}</span>
+        </div>
+        ${v.note ? `<div class="valuable-note">${escapeHtml(v.note)}</div>` : ''}
+        <div class="valuable-tasks">
+          ${v.tasks.map((t, i) => {
+            const key = `${v.id}|${i}`;
+            const done = state.valuableTasks[key];
+            return `<div class="valuable-task ${done ? 'done' : ''}" data-vkey="${key}">
+              <div class="vt-check"></div>
+              <div class="vt-label">${escapeHtml(t)}</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  });
+  html += '</div>';
+  wrap.innerHTML = html;
+
+  wrap.querySelectorAll('.valuable-task').forEach(el => {
+    el.onclick = () => {
+      const key = el.dataset.vkey;
+      const newVal = !state.valuableTasks[key];
+      if (newVal) state.valuableTasks[key] = true;
+      else delete state.valuableTasks[key];
+      updateRemote({ [`valuableTasks/${key}`]: newVal ? true : null });
+      el.classList.toggle('done', newVal);
+      if (navigator.vibrate) try { navigator.vibrate(12); } catch {}
+      const valuableItem = el.closest('.valuable-item');
+      const allTasks = valuableItem.querySelectorAll('.valuable-task');
+      const doneTasks = valuableItem.querySelectorAll('.valuable-task.done').length;
+      valuableItem.querySelector('.valuable-progress').textContent = `${doneTasks}/${allTasks.length}`;
+    };
+  });
+}
+
+function renderSection(roomId, sIdx, section) {
+  const customs = state.custom[sectionKey(roomId, sIdx)] || [];
+  const allItems = [
+    ...section.items.map((label, i) => ({ label, idx: i, custom: false })),
+    ...customs.map((label, i) => ({ label, idx: section.items.length + i, custom: true, customIdx: i }))
+  ];
+  const { decided, total } = sectionStats(roomId, sIdx, section);
+  const sKey = sectionKey(roomId, sIdx);
+  const isCollapsed = state.collapsed[sKey] && decided < total;
+  const wrap = document.createElement('div');
+  wrap.className = 'section' + (isCollapsed ? ' collapsed' : '');
+  const completeClass = (decided === total && total > 0) ? 'complete' : '';
+
+  // Active box for this section
+  const activeBoxId = state.activeBoxBySection[sKey];
+  const activeBox = activeBoxId ? state.boxes[activeBoxId] : null;
+  const boxItemCount = activeBox ? Object.values(state.boxAssignment).filter(b => b === activeBoxId).length : 0;
+
+  wrap.innerHTML = `
+    <div class="section-header">
+      <div class="section-title">${escapeHtml(section.title)}</div>
+      <div class="section-meta ${completeClass}">
+        <span>${decided}/${total}</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+    </div>
+    ${activeBox ? `
+      <div class="active-box-row">
+        <span class="active-box-label">Active box:</span>
+        <span class="active-box-pill">${activeBox.label}</span>
+        <span class="active-box-count">${boxItemCount} item${boxItemCount === 1 ? '' : 's'}</span>
+        <button class="close-box-btn" data-close-box>Close & start new</button>
+      </div>
+    ` : ''}
+    <div class="section-body"></div>
+  `;
+
+  const body = wrap.querySelector('.section-body');
+  allItems.forEach(({ label, idx, custom, customIdx }) => {
+    body.appendChild(renderItem(roomId, sIdx, idx, label, custom, customIdx));
+  });
+
+  const addRow = document.createElement('div');
+  addRow.className = 'add-row';
+  addRow.innerHTML = `
+    <input class="add-input" type="text" placeholder="Add an item…" maxlength="80" />
+    <button class="add-btn">Add</button>
+  `;
+  const input = addRow.querySelector('input');
+  const btn = addRow.querySelector('button');
+  const submit = () => {
+    const v = input.value.trim();
+    if (!v) return;
+    const k = sectionKey(roomId, sIdx);
+    if (!state.custom[k]) state.custom[k] = [];
+    state.custom[k].push(v);
+    updateRemote({ [`custom/${k}`]: state.custom[k] });
+    input.value = '';
+    render();
+  };
+  btn.onclick = submit;
+  input.onkeydown = e => { if (e.key === 'Enter') submit(); };
+  body.appendChild(addRow);
+
+  // Collapse toggle
+  wrap.querySelector('.section-header').onclick = () => {
+    state.collapsed[sKey] = !state.collapsed[sKey];
+    wrap.classList.toggle('collapsed');
+  };
+
+  // Close box button
+  const closeBtn = wrap.querySelector('[data-close-box]');
+  if (closeBtn) {
+    closeBtn.onclick = (e) => {
+      e.stopPropagation();
+      closeBox(roomId, sIdx);
+    };
+  }
+
+  return wrap;
+}
+
+function renderItem(roomId, sIdx, iIdx, label, custom, customIdx) {
+  const key = itemKey(roomId, sIdx, iIdx);
+  const status = state.status[key];
+  const by = state.statusBy[key];
+  const boxId = state.boxAssignment[key];
+  const box = boxId ? state.boxes[boxId] : null;
+
+  const div = document.createElement('div');
+  div.className = 'item' + (status ? ' ' + status : '') + (custom ? ' custom' : '');
+  if (status === 'keep' && by === 'cj') div.classList.add('keep-cj');
+  if (status === 'keep' && by === 'chelsea') div.classList.add('keep-chelsea');
+
+  div.innerHTML = `
+    <div class="status-dot"></div>
+    <div class="item-main">
+      <div class="item-label">${escapeHtml(label)}</div>
+      ${box ? `<span class="box-tag">${escapeHtml(box.label)}</span>` : ''}
+    </div>
+    <div class="action-btns">
+      <button class="action-btn keep ${status === 'keep' ? 'active' : ''}" data-act="keep">📦</button>
+      <button class="action-btn sell ${status === 'sell' ? 'active' : ''}" data-act="sell">💰</button>
+      <button class="action-btn toss ${status === 'toss' ? 'active' : ''}" data-act="toss">🗑</button>
+    </div>
+  `;
+  div.dataset.key = key;
+  div.dataset.label = label;
+
+  div.querySelector('.status-dot').onclick = e => {
+    e.stopPropagation();
+    setItemStatus(roomId, sIdx, iIdx, status === 'keep' ? null : 'keep', label);
+    onCheckHit(div);
+    render();
+  };
+  div.querySelectorAll('.action-btn').forEach(btn => {
+    btn.onclick = e => {
+      e.stopPropagation();
+      const act = btn.dataset.act;
+      const newStatus = state.status[key] === act ? null : act;
+      setItemStatus(roomId, sIdx, iIdx, newStatus, label);
+      onCheckHit(div);
+      render();
+    };
+  });
+  return div;
+}
+
+/* ===== BOXES VIEW ===== */
+function renderBoxesView() {
+  const main = document.getElementById('main');
+  const boxes = Object.values(state.boxes).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  main.innerHTML = `
+    <div class="room-header">
+      <div class="room-eyebrow">All boxes across all rooms</div>
+      <h1 class="room-title">Boxes</h1>
+      <div class="room-note">Write the label on the actual box with a marker. Items show their box label as a green tag throughout the app.</div>
+    </div>
+    <input class="box-search" id="boxSearch" placeholder="Search items or box labels…">
+    <div class="boxes-view" id="boxesGrid"></div>
+  `;
+  const grid = document.getElementById('boxesGrid');
+  const search = document.getElementById('boxSearch');
+
+  function paint() {
+    const q = search.value.trim().toLowerCase();
+    grid.innerHTML = '';
+    if (boxes.length === 0) {
+      grid.innerHTML = `<div style="text-align:center;padding:40px 20px;color:var(--ink-faint);font-style:italic">No boxes yet. Tap 📦 on an item to start one.</div>`;
+      return;
+    }
+    boxes.forEach(box => {
+      // find items in this box
+      const items = [];
+      Object.entries(state.boxAssignment).forEach(([itemK, bId]) => {
+        if (bId !== box.id) return;
+        const [rId, sI, iI] = itemK.split('|');
+        const room = ROOMS.find(r => r.id === rId);
+        if (!room) return;
+        const section = room.sections[+sI];
+        if (!section) return;
+        const customs = state.custom[sectionKey(rId, +sI)] || [];
+        const allItems = [...section.items, ...customs];
+        const label = allItems[+iI];
+        if (label) items.push(label);
+      });
+      // filter
+      if (q) {
+        const matches = box.label.toLowerCase().includes(q) || items.some(i => i.toLowerCase().includes(q));
+        if (!matches) return;
+      }
+      const card = document.createElement('div');
+      card.className = 'box-card' + (box.closed ? ' closed' : '');
+      card.innerHTML = `
+        <div class="box-card-header">
+          <span class="box-card-label">${escapeHtml(box.label)}</span>
+          <span class="box-card-meta">${items.length} item${items.length === 1 ? '' : 's'} · by ${escapeHtml(box.createdBy || '?')}</span>
+          <span class="box-card-status ${box.closed ? 'closed' : 'open'}">${box.closed ? 'Closed' : 'Open'}</span>
+        </div>
+        <ul class="box-card-items">
+          ${items.length ? items.map(i => `<li>${escapeHtml(i)}</li>`).join('') : '<li style="color:var(--ink-faint);font-style:italic">No items yet</li>'}
+        </ul>
+        <div class="box-card-actions">
+          ${!box.closed ? `<button class="box-action" data-close="${box.id}">Close this box</button>` : ''}
+          <button class="box-action" data-rename="${box.id}">Rename</button>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+    grid.querySelectorAll('[data-close]').forEach(b => {
+      b.onclick = () => {
+        const id = b.dataset.close;
+        const box = state.boxes[id];
+        if (!box) return;
+        state.boxes[id].closed = true;
+        if (state.activeBoxBySection[box.sectionKey] === id) {
+          delete state.activeBoxBySection[box.sectionKey];
+        }
+        updateRemote({
+          [`boxes/${id}/closed`]: true,
+          [`activeBoxBySection/${box.sectionKey}`]: null,
+        });
+        logActivity({ kind: 'close-box', boxLabel: box.label });
+        render();
+      };
+    });
+    grid.querySelectorAll('[data-rename]').forEach(b => {
+      b.onclick = () => {
+        const id = b.dataset.rename;
+        const box = state.boxes[id];
+        const newName = prompt('Rename box (this is what you write on it):', box.label);
+        if (newName && newName.trim()) {
+          state.boxes[id].label = newName.trim();
+          updateRemote({ [`boxes/${id}/label`]: newName.trim() });
+          render();
+        }
+      };
+    });
+  }
+  paint();
+  search.oninput = paint;
+}
+
+/* ===== ACTIVITY VIEW ===== */
+function renderActivityView() {
+  const main = document.getElementById('main');
+  const activities = state.activity || [];
+  main.innerHTML = `
+    <div class="room-header">
+      <div class="room-eyebrow">Real-time activity from both phones</div>
+      <h1 class="room-title">Activity</h1>
+      <div class="room-note">Last ${Math.min(activities.length, 50)} actions. Updates live as either of you packs.</div>
+    </div>
+    <ul class="activity-list">
+      ${activities.length === 0 ? '<li style="color:var(--ink-faint);font-style:italic;justify-content:center">Nothing yet. Get going.</li>' : ''}
+      ${activities.map(a => activityRow(a)).join('')}
+    </ul>
+  `;
+}
+
+function activityRow(a) {
+  const who = (a.who || 'both');
+  const whoLabel = who === 'cj' ? 'CJ' : who === 'chelsea' ? 'CHE' : '·';
+  const time = relTime(a.ts);
+  let action = '';
+  if (a.kind === 'triage') {
+    const verb = a.decision === 'keep' ? 'packed' : a.decision === 'sell' ? 'flagged to sell' : 'tossed';
+    action = `${verb} <strong>${escapeHtml(a.label)}</strong>`;
+    if (a.boxLabel) action += ` <span class="box-tag" style="margin-left:6px">${escapeHtml(a.boxLabel)}</span>`;
+    if (a.sectionTitle) action += ` <span style="color:var(--ink-faint);font-size:11px">— ${escapeHtml(a.sectionTitle)}</span>`;
+  } else if (a.kind === 'close-box') {
+    action = `closed box <span class="box-tag" style="margin-left:2px">${escapeHtml(a.boxLabel)}</span>`;
+  } else {
+    action = a.kind || '';
+  }
+  return `<li>
+    <span class="activity-who ${who}">${whoLabel}</span>
+    <span class="activity-action">${action}</span>
+    <span class="activity-time">${time}</span>
+  </li>`;
+}
+
+function relTime(ts) {
+  if (!ts) return '';
+  const diff = Date.now() - ts;
+  if (diff < 60000) return 'just now';
+  if (diff < 3600000) return Math.floor(diff / 60000) + 'm ago';
+  if (diff < 86400000) return Math.floor(diff / 3600000) + 'h ago';
+  return Math.floor(diff / 86400000) + 'd ago';
+}
+
+/* ===== ACTIVITY TICKER (live updates) ===== */
+let tickerHideTimeout = null;
+function showActivityTicker(a) {
+  if (!a) return;
+  if (a.who === myName) return; // don't show own actions
+  const ticker = document.getElementById('activityTicker');
+  const who = a.who === 'cj' ? 'CJ' : a.who === 'chelsea' ? 'Chelsea' : 'Someone';
+  let text = `<span class="who ${a.who}">${who}</span> `;
+  if (a.kind === 'triage') {
+    const verb = a.decision === 'keep' ? 'just packed' : a.decision === 'sell' ? 'flagged to sell' : 'tossed';
+    text += `${verb} <strong>${escapeHtml(a.label)}</strong>`;
+    if (a.boxLabel) text += ` <span class="box-tag">${escapeHtml(a.boxLabel)}</span>`;
+  } else if (a.kind === 'close-box') {
+    text += `closed box <span class="box-tag">${escapeHtml(a.boxLabel)}</span>`;
+  }
+  ticker.innerHTML = text;
+  ticker.classList.remove('empty');
+  clearTimeout(tickerHideTimeout);
+  tickerHideTimeout = setTimeout(() => {
+    ticker.classList.add('empty');
+  }, 6000);
+}
+
+/* ===== STREAK + MILESTONES ===== */
+let streak = 0;
+let streakTimeout = null;
+const hitMilestones = new Set();
+
+function onCheckHit(itemEl) {
+  if (navigator.vibrate) try { navigator.vibrate(15); } catch {}
+  if (itemEl) {
+    itemEl.classList.add('flash');
+    setTimeout(() => itemEl.classList.remove('flash'), 800);
+  }
+  streak++;
+  clearTimeout(streakTimeout);
+  const pill = document.getElementById('streakPill');
+  const count = document.getElementById('streakCount');
+  if (streak >= 3) {
+    pill.classList.add('show');
+    count.textContent = streak;
+  }
+  streakTimeout = setTimeout(() => {
+    streak = 0;
+    pill.classList.remove('show');
+  }, 90000);
+
+  const { decided, total } = totalStats();
+  const pct = total === 0 ? 0 : Math.round((decided / total) * 100);
+  const milestones = [10, 25, 50, 75, 90, 100];
+  if (milestones.includes(pct) && !hitMilestones.has(pct)) {
+    hitMilestones.add(pct);
+    const msgs = {
+      10: 'First 10% triaged. <em>Momentum.</em>',
+      25: 'A quarter done. <em>Keep going.</em>',
+      50: 'Halfway. <em>Look at you go.</em>',
+      75: 'Three-quarters. <em>The end is real.</em>',
+      90: '<em>Almost there.</em>',
+      100: 'EVERY item triaged. <em>You did it.</em>'
+    };
+    showToast(msgs[pct]);
+  }
+  if ([10, 20, 30, 50].includes(streak)) {
+    showToast(`<em>${streak} in a row.</em> 🔥`);
+  }
+}
+
+function showToast(html) {
+  const toast = document.getElementById('toast');
+  toast.innerHTML = html;
+  toast.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => toast.classList.remove('show'), 2800);
+}
+
+/* ===== TRIAGE MODAL ===== */
+let pickedItemRef = null;
+document.getElementById('pickBtn').onclick = () => {
+  if (view !== 'rooms') {
+    view = 'rooms';
+    render();
+  }
+  const room = ROOMS.find(r => r.id === activeRoom);
+  if (!room) return;
+  const candidates = [];
+  room.sections.forEach((s, sIdx) => {
+    const customs = state.custom[sectionKey(room.id, sIdx)] || [];
+    const total = s.items.length + customs.length;
+    for (let i = 0; i < total; i++) {
+      if (!state.status[itemKey(room.id, sIdx, i)]) {
+        const label = i < s.items.length ? s.items[i] : customs[i - s.items.length];
+        candidates.push({ roomId: room.id, sIdx, iIdx: i, label, section: s.title });
+      }
+    }
+  });
+  if (candidates.length === 0) {
+    showToast(`<em>${room.label} is triaged.</em> Pick another room.`);
+    return;
+  }
+  const pick = candidates[Math.floor(Math.random() * candidates.length)];
+  pickedItemRef = pick;
+  document.getElementById('pickItemLabel').textContent = pick.label;
+  document.getElementById('pickItemFrom').textContent = `from ${pick.section}`;
+  document.getElementById('pickModal').classList.add('show');
+};
+function closePick() {
+  document.getElementById('pickModal').classList.remove('show');
+  pickedItemRef = null;
+}
+function triagePick(decision) {
+  if (!pickedItemRef) return closePick();
+  const { roomId, sIdx, iIdx, label } = pickedItemRef;
+  setItemStatus(roomId, sIdx, iIdx, decision, label);
+  onCheckHit(null);
+  closePick();
+  render();
+}
+
+/* ===== PILE VIEWER ===== */
+function openPile(pileType) {
+  const items = [];
+  ROOMS.forEach(room => {
+    room.sections.forEach((s, sIdx) => {
+      const customs = state.custom[sectionKey(room.id, sIdx)] || [];
+      const total = s.items.length + customs.length;
+      for (let i = 0; i < total; i++) {
+        const key = itemKey(room.id, sIdx, i);
+        if (state.status[key] === pileType) {
+          const label = i < s.items.length ? s.items[i] : customs[i - s.items.length];
+          const boxId = state.boxAssignment[key];
+          const box = boxId ? state.boxes[boxId] : null;
+          items.push({ label, room: room.label, section: s.title, box: box ? box.label : null });
+        }
+      }
+    });
+  });
+  const titleMap = { keep: 'Keep pile', sell: 'Sell pile', toss: 'Toss pile' };
+  const noteMap = {
+    keep: "Boxed. Tag shows which box. Mark the box with a marker — text on the tag.",
+    sell: "Set aside to sell. Photograph for Marketplace/OfferUp. List in one batch.",
+    toss: "Heading to the trash. Bag and out the door. Moldy items: heavy contractor bags."
+  };
+  document.getElementById('pileTitle').textContent = `${titleMap[pileType]} (${items.length})`;
+  document.getElementById('pileSubtitle').textContent = noteMap[pileType];
+  const list = document.getElementById('pileList');
+  if (items.length === 0) {
+    list.innerHTML = `<li class="pile-empty">Nothing here yet.</li>`;
+  } else {
+    list.innerHTML = items.map(it => `
+      <li>
+        <span>${escapeHtml(it.label)}</span>
+        <span>
+          ${it.box ? `<span class="pile-box">${escapeHtml(it.box)}</span>` : ''}
+          <span class="pile-from">${escapeHtml(it.room)}</span>
+        </span>
+      </li>
+    `).join('');
+  }
+  document.getElementById('pileModal').classList.add('show');
+}
+function closePileModal() { document.getElementById('pileModal').classList.remove('show'); }
+
+/* ===== TIMER ===== */
+const WORK_MIN = 25, BREAK_MIN = 5;
+let timerMode = 'work', timerRunning = false;
+let timerRemaining = WORK_MIN * 60;
+let timerInterval = null;
+function formatTime(s) {
+  const m = Math.floor(s / 60), sec = s % 60;
+  return `${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+}
+function updateTimerDisplay() {
+  document.getElementById('timerDisplay').textContent = formatTime(timerRemaining);
+  const modeEl = document.getElementById('timerMode');
+  modeEl.textContent = timerRunning ? (timerMode === 'work' ? 'Pack' : 'Break') : (timerMode === 'work' ? 'Ready' : 'Break');
+  const wrap = document.getElementById('timerWrap');
+  wrap.classList.remove('running', 'break');
+  if (timerRunning) wrap.classList.add(timerMode === 'work' ? 'running' : 'break');
+}
+function tick() {
+  if (!timerRunning) return;
+  timerRemaining--;
+  updateTimerDisplay();
+  if (timerRemaining <= 0) {
+    if (timerMode === 'work') {
+      timerMode = 'break';
+      timerRemaining = BREAK_MIN * 60;
+      showToast('<em>Break time.</em> Stretch, water, sit.');
+    } else {
+      timerMode = 'work';
+      timerRemaining = WORK_MIN * 60;
+      showToast('<em>Back at it.</em> 25 minutes.');
+    }
+    if (navigator.vibrate) try { navigator.vibrate([200, 80, 200]); } catch {}
+    updateTimerDisplay();
+  }
+}
+document.getElementById('timerToggle').onclick = () => {
+  timerRunning = !timerRunning;
+  document.getElementById('playIcon').style.display = timerRunning ? 'none' : 'block';
+  document.getElementById('pauseIcon').style.display = timerRunning ? 'block' : 'none';
+  if (timerRunning) timerInterval = setInterval(tick, 1000);
+  else clearInterval(timerInterval);
+  updateTimerDisplay();
+};
+document.getElementById('timerReset').onclick = () => {
+  timerRunning = false;
+  clearInterval(timerInterval);
+  timerMode = 'work';
+  timerRemaining = WORK_MIN * 60;
+  document.getElementById('playIcon').style.display = 'block';
+  document.getElementById('pauseIcon').style.display = 'none';
+  updateTimerDisplay();
+};
+
+/* ===== STATS ===== */
+function sectionStats(roomId, sIdx, section) {
+  const customs = state.custom[sectionKey(roomId, sIdx)] || [];
+  const total = section.items.length + customs.length;
+  let decided = 0;
+  for (let i = 0; i < total; i++) if (state.status[itemKey(roomId, sIdx, i)]) decided++;
+  return { decided, total };
+}
+function roomStats(roomId) {
+  const room = ROOMS.find(r => r.id === roomId);
+  let decided = 0, total = 0;
+  room.sections.forEach((s, sIdx) => {
+    const r = sectionStats(roomId, sIdx, s);
+    decided += r.decided; total += r.total;
+  });
+  return { decided, total };
+}
+function dayStats(day) {
+  let decided = 0, total = 0;
+  ROOMS.forEach(room => {
+    if (day !== null && room.day !== day) return;
+    const r = roomStats(room.id);
+    decided += r.decided; total += r.total;
+  });
+  return { decided, total };
+}
+function totalStats() {
+  let decided = 0, total = 0;
+  ROOMS.forEach(room => {
+    const r = roomStats(room.id);
+    decided += r.decided; total += r.total;
+  });
+  return { decided, total };
+}
+function statusCounts() {
+  let keep = 0, sell = 0, toss = 0, pending = 0, total = 0;
+  ROOMS.forEach(room => {
+    room.sections.forEach((s, sIdx) => {
+      const customs = state.custom[sectionKey(room.id, sIdx)] || [];
+      const sectionTotal = s.items.length + customs.length;
+      for (let i = 0; i < sectionTotal; i++) {
+        const st = state.status[itemKey(room.id, sIdx, i)];
+        if (st === 'keep') keep++;
+        else if (st === 'sell') sell++;
+        else if (st === 'toss') toss++;
+        else pending++;
+        total++;
+      }
+    });
+  });
+  return { keep, sell, toss, pending, total };
+}
+
+function updateOverallStats() {
+  const c = statusCounts();
+  document.getElementById('countKeep').textContent = c.keep;
+  document.getElementById('countSell').textContent = c.sell;
+  document.getElementById('countToss').textContent = c.toss;
+  document.getElementById('countPending').textContent = c.pending;
+  document.getElementById('countBoxes').textContent = Object.keys(state.boxes).length;
+  const t = c.total || 1;
+  document.getElementById('progressKeep').style.width = (c.keep / t * 100) + '%';
+  document.getElementById('progressSell').style.width = (c.sell / t * 100) + '%';
+  document.getElementById('progressToss').style.width = (c.toss / t * 100) + '%';
+}
+
+function positionStickyBars() {
+  const header = document.querySelector('.header');
+  const ticker = document.querySelector('.activity-ticker');
+  const focus = document.querySelector('.focus-bar');
+  const tabs = document.querySelector('.tabs-wrap');
+  if (!header || !focus || !tabs) return;
+  const h = header.offsetHeight + (ticker.classList.contains('empty') ? 0 : ticker.offsetHeight);
+  focus.style.top = h + 'px';
+  tabs.style.top = (h + focus.offsetHeight) + 'px';
+}
+window.addEventListener('resize', positionStickyBars);
+
+function collapseAll() {
+  ROOMS.forEach(r => r.sections.forEach((s, sIdx) => state.collapsed[sectionKey(r.id, sIdx)] = true));
+  render();
+}
+function expandAll() {
+  state.collapsed = {};
+  render();
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+/* ===== INIT ===== */
+updateTimerDisplay();
+if (!checkSetupComplete()) {
+  document.getElementById('setup').style.display = 'flex';
+}
+</script>
+</body>
+</html>
